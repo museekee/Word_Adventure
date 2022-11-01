@@ -1,0 +1,28 @@
+html 
+    head 
+        script(src="/assets/scripts/swal.js")
+        script(src="/assets/scripts/main.js")
+        link(rel="stylesheet", href="/assets/styles/main.css")
+        link(rel="stylesheet", href="/assets/styles/scrollbar.css")
+    body
+        #Profile
+            h1#Nickname=L["my_ziu"]
+            #Exp
+                #Exp-bar
+                    | 00000━12345
+                    #Exp-bar-value
+                span=L["exp"]
+            #Ziu
+                img.Ziu#Ziu-body(src="/assets/images/ziu/body/def.svg")
+                img.Ziu#Ziu-eye(src="/assets/images/ziu/eye/def.svg")
+                img.Ziu#Ziu-mouse(src="/assets/images/ziu/mouse/def.svg")
+                img.Ziu#Ziu-clothes(src="/assets/images/ziu/clothes/def.svg")
+            #Buttons 
+                button 
+                    img(src="/assets/images/shop.svg")
+        #Categories
+            each data in category
+                dama-leaf(data-category=data["id"] onclick="category_click(this)")
+                    span.Categories-leaf-title.Categories-leaf-text=data["name"]
+                    span.Categories-leaf-description.Categories-leaf-text=data["description"]
+        button(onclick="gameMake()")#Game-make=L["game_start"]

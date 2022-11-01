@@ -1,0 +1,68 @@
+body {
+    margin: 0;
+    padding: 40px 0px 30px 0px;
+}
+#Main {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    grid-template-columns: 335px 1fr 335px;
+    grid-template-rows: 2fr 1fr;
+}
+#Word, #Word-write {
+    font-weight: bold;
+}
+#Word {
+    display: flex;
+    grid-column: 2;
+    grid-row: 1;
+    background: #45d064;
+    border-radius: 100px;
+    font-size: 100px;
+    color: #ffffff;
+    align-items: center;
+    justify-content: center;
+}
+#Bottom {
+    display: grid;
+    grid-column: 2;
+    grid-row: 2;
+    grid-template-columns: 2fr 1fr;
+}
+#Word-write {
+    margin-right: 10;
+    grid-column: 1;
+    font-size: 50px;
+    text-align: center;
+    outline: none;
+    border: none;
+    color: #000000;
+}
+#Info {
+    margin-left: 10;
+    grid-column: 2;
+    padding: 20px;
+}
+#Info > div {
+    font-size: 30px;
+    font-weight: bold;
+}
+#Word-write, #Info {
+    margin-top: 65px;
+    background: #34a74d;
+    border-radius: 50px;
+}
+@media (max-width: 1600px) {
+    #Main {
+        grid-template-columns: 200px 1fr 200px;
+        grid-template-rows: 2fr 1fr;
+    }
+    #Info > div {
+        font-size: 20px;
+    }
+}
+@media (max-width: 1300px) {
+    #Info > div {
+        font-size: 15px;
+    }
+}

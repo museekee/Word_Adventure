@@ -1,0 +1,16 @@
+html 
+    head 
+        #wsurl(style="display: none;") #{ws}
+        link(rel="stylesheet", href="/assets/styles/game.css")
+        link(rel="stylesheet", href="/assets/styles/scrollbar.css")
+    body
+        #Main
+            #Word=L["game_ready"]
+            #Bottom 
+                input#Word-write(type="text" onKeypress="javascript:if(event.keyCode==13) {answer()}")
+                #Info
+                    div#Subject=L["game_ready"]
+                    div#Wrong=L["game_ready"]
+                    div#Round=L["game_ready"]
+                    div#Exp=L["game_ready"]
+        script(src="/assets/scripts/game.js") 
