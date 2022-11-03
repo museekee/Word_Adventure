@@ -3,44 +3,66 @@ import wsModule from "ws"
 import config from "@lib/config.json"
 import * as NLog from "@lib/NyLog"
 import db from "@lib/db"
+import Game from "@lib/types/game"
+import ko_KR from "@lib/lang/ko_KR.json"
 
 const wssv = new wsModule.Server({
     port: config.GAME_PORT
 })
-const rooms: any = {}
+const rooms: Game.Rooms = {}
+const ko_KR_category: {[x: string]: {name: string, description: string}} = ko_KR.category
 wssv.on("connection", async (ws, req) => {
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
     NLog.Log("Connect game server", { ip: ip })
     
     ws.on("message", (e) => {
         const data = JSON.parse(e.toString())
+        const myroom = rooms[data.id]
         // console.log(data)
         switch (data.type) {
             case "start": {
-                db.query(`SELECT * FROM games WHERE ID = '${data.id}' LIMIT 1;`, (err, rows, fields) => {
-                    const row = JSON.parse(JSON.stringify(rows[0]))
-                    const category = randomArray(JSON.parse(row.CATEGORY))
+                db.query(`SELECT * FROM games WHERE ID = '${data.id}' LIMIT 1;`, (err, rows: Game.RoomsDB[], fields) => {
+                    const row: Game.RoomsDB = JSON.parse(JSON.stringify(rows[0]))
+                    const category: string = randomArray(JSON.parse(row.CATEGORY)).toString()
                     db.query(`SELECT WORD FROM words WHERE CATEGORY = '${category}' ORDER BY RAND() LIMIT 1;`, (errt, rows, fieldst) => {
                         const row = JSON.parse(JSON.stringify(rows[0]))
-                        rooms[data.id].correct_answer = row.WORD
+                        myroom.answer = row.WORD
+                        myroom.category = ko_KR_category[category].name
                         send({
-                            type: "word",
-                            value: cho_hangul(row.WORD)
-                        })
+                            type: "start",
+                            word: cho_hangul(row.WORD)
+                        }, data.id)
                     })
                 })
                 break;
             }
             case "answer": {
-                if (rooms[data.id].correct_answer === data.value) send({
-                    type: "correct",
-                    value: true
-                })
-                else send({
-                    type: "correct",
-                    value: false
-                })
-                console.log(rooms[data.id].correct_answer)
+                if (myroom.answer === data.value) {
+                    myroom.exp + (data.value.length * 5 + rand(0, 10))
+                    myroom.time -= (myroom.time - data.time)
+                    console.log(data)
+                    console.log(myroom)
+                    if (myroom.now_round === myroom.max_round) {
+                        send({
+                            type: "finish"
+                        }, data.id)
+                    }
+                    else {
+                        myroom.now_round++
+                        send({
+                            type: "correct",
+                            value: true
+                        }, data.id)
+                    }
+                }
+                else {
+                    myroom.wrong++
+                    send({
+                        type: "correct",
+                        value: false
+                    }, data.id)
+                }
+                console.log(myroom.answer)
             }
         }
     })
@@ -50,7 +72,16 @@ wssv.on("connection", async (ws, req) => {
     ws.on("close", (code) => {
         NLog.Log("Disconnect game server", { ip: ip, code: code })
     })
-    function send(data: object) {
+    function send(data: Game.WsSend, id?: string) {
+        if (id) {
+            const myroom = rooms[id]
+            data.category = myroom.category
+            data.wrong = myroom.wrong
+            data.now_round = myroom.now_round
+            data.exp = myroom.exp
+            data.max_round = myroom.max_round
+            data.time = myroom.time
+        }
         ws.send(JSON.stringify(data))
     }
     function cho_hangul(str: string) {
@@ -67,17 +98,29 @@ wssv.on("connection", async (ws, req) => {
 const router = express.Router()
 
 router.get("/:roomId", (req, res) => {
-    db.query(`SELECT * FROM games WHERE ID = '${req.params.roomId}' LIMIT 1;`, (e, rows) => {
+    db.query(`SELECT * FROM games WHERE ID = '${req.params.roomId}' LIMIT 1;`, (e, rows: Game.RoomsDB[]) => {
         if (rows.length === 0) return res.sendStatus(404)
-        const ko_KR = require("@lib/lang/ko_KR.json")
-        ko_KR.ws = `ws://${req.get("host")}:${config.GAME_PORT}`
-        rooms[req.params.roomId] = {}
-        return res.render("game", ko_KR)
+        rooms[req.params.roomId] = {
+            answer: undefined,
+            category: undefined,
+            exp: 0,
+            wrong: 0,
+            now_round: 1,
+            max_round: rows[0].ROUND,
+            time: rows[0].TIME
+        }
+        return res.render("game", {
+            ko_KR,
+            ws: `ws://${req.get("host")}:${config.GAME_PORT}`
+        })
     })
 })
 
-function randomArray(arr: unknown[]): unknown {
+function randomArray(arr: any[]): any {
     return arr[Math.floor(Math.random()*arr.length)]
+}
+function rand(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 export = router

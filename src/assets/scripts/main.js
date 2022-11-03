@@ -20,15 +20,19 @@ async function gameMake() {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            category: selectedCategory
+            category: selectedCategory,
+            option: {
+                round: document.getElementById("Round").value,
+                time: document.getElementById("Time").value
+            }
         })
     })
-    console.log(res.status, res.statusText, res.text)
     if (res.redirected) window.location.href = res.url
     else {
+        const data = JSON.parse(await res.text())
         swal.fire({
             title: '오류!',
-            text: '게임 접속에 실패했습니다.',
+            html: `게임 접속에 실패했습니다.<br/>reason : ${data.reason}`,
             icon: 'error',
             confirmButtonText: '확인'
         })

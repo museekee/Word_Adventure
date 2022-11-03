@@ -5,21 +5,18 @@
     "game_start": "게임 시작",
     "game_ready": "게임 준비중"
   },
-  "category": [
-    {
-      "id": "GGPT_ELEMSCH",
+  "category": {
+    "GGPT_ELEMSCH": {
       "name": "경기 평택 초등학교",
       "description": "경기도 평택시에 있는 초등학교들 입니다."
     },
-    {
-      "id": "GGPT_MIDSCH",
+    "GGPT_MIDSCH": {
       "name": "경기 평택 중학교",
       "description": "경기도 평택시에 있는 중학교들 입니다."
     },
-    {
-      "id": "GGPT_HIGHSCH",
+    "GGPT_HIGHSCH": {
       "name": "경기 평택 고등학교",
       "description": "경기도 평택시에 있는 고등학교들 입니다."
     }
-  ]
+  }
 }

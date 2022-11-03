@@ -21,8 +21,20 @@ html
                 button 
                     img(src="/assets/images/shop.svg")
         #Categories
-            each data in category
-                dama-leaf(data-category=data["id"] onclick="category_click(this)")
-                    span.Categories-leaf-title.Categories-leaf-text=data["name"]
-                    span.Categories-leaf-description.Categories-leaf-text=data["description"]
+            - for (id in category)
+                dama-leaf(data-category=id onclick="category_click(this)")
+                    span.Categories-leaf-title.Categories-leaf-text=category[id]["name"]
+                    span.Categories-leaf-description.Categories-leaf-text=category[id]["description"]
+        #Game-option 
+            h1 게임 설정
+            div 
+                h2 라운드
+                span 
+                    input#Round(type="number", value="10", max="50")
+                    span 라운드
+            div 
+                h2 시간
+                span 
+                    input#Time(type="number", value="200", max="500")
+                    span 초
         button(onclick="gameMake()")#Game-make=L["game_start"]

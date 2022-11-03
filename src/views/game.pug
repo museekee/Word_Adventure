@@ -5,12 +5,18 @@ html
         link(rel="stylesheet", href="/assets/styles/scrollbar.css")
     body
         #Main
-            #Word=L["game_ready"]
+            #Round_time_back 
+                #Round_time_value
+                    | 60
+            #Word=ko_KR.L["game_ready"]
             #Bottom 
                 input#Word-write(type="text" onKeypress="javascript:if(event.keyCode==13) {answer()}")
                 #Info
-                    div#Subject=L["game_ready"]
-                    div#Wrong=L["game_ready"]
-                    div#Round=L["game_ready"]
-                    div#Exp=L["game_ready"]
+                    div#Subject=ko_KR.L["game_ready"]
+                    div#Wrong=ko_KR.L["game_ready"]
+                    div#Round=ko_KR.L["game_ready"]
+                    div#Exp=ko_KR.L["game_ready"]
+            #All_time_back 
+                #All_time_value
+                    | 180
         script(src="/assets/scripts/game.js") 

@@ -23,7 +23,9 @@ app.post("/tryMakeGame", async (req, res) => {
     for (const key in req.body.category) {
         if (req.body.category[key]) category.push(key)
     }
-    console.log(category)
+    for (const key in req.body.option)
+        if (!req.body.option[key]) 
+            return res.status(403).send({reason: "No option"})
     if (category.length === 0) return res.status(403).send({reason: "No category"})
     const sha1 = crypto.createHash("sha1")
     sha1.update(`${rand(0, 999)}${category[0]}`)
@@ -31,13 +33,15 @@ app.post("/tryMakeGame", async (req, res) => {
     db.query(`INSERT INTO games (
         ID,
         CATEGORY,
-        MAX_ROUND
+        ROUND,
+        TIME
     )
     VALUES
     (
         '${roomId}',
         '${JSON.stringify(category)}',
-        '5'
+        '${req.body.option.round}',
+        '${req.body.option.time * 1000}'
     );`)
     res.redirect(`/g/${roomId}`)
 })
