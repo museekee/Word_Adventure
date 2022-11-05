@@ -1,4 +1,4 @@
-import maria, { FieldPacket, RowDataPacket } from "mysql2/promise"
+import maria, { FieldPacket } from "mysql2/promise"
 import config from "@lib/config.json"
 import DB from "./types/db"
 
