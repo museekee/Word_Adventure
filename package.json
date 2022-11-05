@@ -1,5 +1,5 @@
 {
-  "name": "dama",
+  "name": "word_adventure",
   "version": "1.0.0",
   "description": "",
   "main": "src/app.ts",
