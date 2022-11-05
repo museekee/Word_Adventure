@@ -4,15 +4,15 @@ html
         script(src="/assets/scripts/main.js")
         link(rel="stylesheet", href="/assets/styles/main.css")
         link(rel="stylesheet", href="/assets/styles/scrollbar.css")
-        title=L["TITLE"]
+        title 워드 어드벤처
     body
         #Profile
-            h1#Nickname=L["my_ziu"]
+            h1#Nickname 내 캐릭터
             #Exp
                 #Exp-bar
                     | 00000━12345
                     #Exp-bar-value
-                span=L["exp"]
+                span EXP
             #Ziu
                 img.Ziu#Ziu-body(src="/assets/images/ziu/body/def.svg")
                 img.Ziu#Ziu-eye(src="/assets/images/ziu/eye/def.svg")
@@ -38,4 +38,4 @@ html
                 span 
                     input#Time(type="number", value="200", max="500")
                     span 초
-        button(onclick="gameMake()")#Game-make=L["game_start"]
+        button(onclick="gameMake()")#Game-make 게임 시작

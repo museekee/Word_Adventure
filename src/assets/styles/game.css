@@ -164,6 +164,21 @@ body {
     font-size: 40px;
     font-weight: bold;
 }
+#Goto_lobby {
+    display: grid;
+    width: 200px;
+    height: 60px;
+    font-size: 20px;
+    font-weight: bold;
+    background: #ffff00;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    align-content: center;
+    justify-items: center;
+    color: #000000;
+    text-decoration: none;
+}
 @media (max-width: 1600px) {
     #Main {
         grid-template-columns: 200px 1fr 200px;

@@ -60,7 +60,6 @@ ws.onerror = e => {
 ws.onmessage = async e => {
     const data = JSON.parse(e.data)
     changeDetailByData(data)
-    console.log(data)
     switch (data.type) {
         case "start": 
             nowquestion = data.word
