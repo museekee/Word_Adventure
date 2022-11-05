@@ -23,6 +23,7 @@ wssv.on("connection", async (ws, req) => {
             case "start": {
                 db.query(`SELECT * FROM games WHERE ID = '${data.id}' LIMIT 1;`, (err, rows: Game.RoomsDB[], fields) => {
                     const row: Game.RoomsDB = JSON.parse(JSON.stringify(rows[0]))
+                    myroom.categories = JSON.parse(row.CATEGORY)
                     const category: string = randomArray(JSON.parse(row.CATEGORY)).toString()
                     db.query(`SELECT WORD FROM words WHERE CATEGORY = '${category}' ORDER BY RAND() LIMIT 1;`, (errt, rows, fieldst) => {
                         const row = JSON.parse(JSON.stringify(rows[0]))
@@ -38,7 +39,7 @@ wssv.on("connection", async (ws, req) => {
             }
             case "answer": {
                 if (myroom.answer === data.value) {
-                    myroom.exp + (data.value.length * 5 + rand(0, 10))
+                    myroom.exp += (data.value.length * 5 + rand(0, 10))
                     myroom.time -= (myroom.time - data.time)
                     console.log(data)
                     console.log(myroom)
@@ -63,7 +64,13 @@ wssv.on("connection", async (ws, req) => {
                     }, data.id)
                 }
                 console.log(myroom.answer)
+                break
             }
+            case "timeout":
+                send({
+                    type: "finish"
+                }, data.id)
+                break
         }
     })
     ws.on("error", (e) => {
@@ -81,6 +88,14 @@ wssv.on("connection", async (ws, req) => {
             data.exp = myroom.exp
             data.max_round = myroom.max_round
             data.time = myroom.time
+            const categories: string[] = []
+            myroom.categories!.forEach(v => {
+                categories.push(ko_KR_category[v].name)
+            });
+            data.categories = categories
+            const accuracy = (myroom.now_round / (myroom.wrong + myroom.max_round))
+            console.log(accuracy)
+            data.dam = Math.round((9160 * accuracy) / myroom.def_time * (myroom.time === myroom.def_time ? 0 : myroom.time))
         }
         ws.send(JSON.stringify(data))
     }
@@ -107,7 +122,9 @@ router.get("/:roomId", (req, res) => {
             wrong: 0,
             now_round: 1,
             max_round: rows[0].ROUND,
-            time: rows[0].TIME
+            time: rows[0].TIME,
+            def_time: rows[0].TIME,
+            categories: undefined
         }
         return res.render("game", {
             ko_KR,

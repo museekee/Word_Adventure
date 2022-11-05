@@ -14,7 +14,9 @@ declare namespace Game {
             wrong: number;
             now_round: number;
             max_round: number;
-            time: number
+            time: number;
+            def_time: number;
+            categories: string[] | undefined;
         }
     }
     interface WsSend {
@@ -27,5 +29,7 @@ declare namespace Game {
         exp?: number;
         max_round?: number;
         time?: number;
+        categories?: string[];
+        dam?: number;
     }
 }

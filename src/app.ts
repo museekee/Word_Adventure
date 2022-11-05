@@ -23,9 +23,11 @@ app.post("/tryMakeGame", async (req, res) => {
     for (const key in req.body.category) {
         if (req.body.category[key]) category.push(key)
     }
-    for (const key in req.body.option)
-        if (!req.body.option[key]) 
+    const option = req.body.option
+    for (const key in option)
+        if (!option[key]) 
             return res.status(403).send({reason: "No option"})
+    if (option.round <= 0 || option.time <= 0) return res.status(403).send({reason: "Do not use minus"})
     if (category.length === 0) return res.status(403).send({reason: "No category"})
     const sha1 = crypto.createHash("sha1")
     sha1.update(`${rand(0, 999)}${category[0]}`)
@@ -40,8 +42,8 @@ app.post("/tryMakeGame", async (req, res) => {
     (
         '${roomId}',
         '${JSON.stringify(category)}',
-        '${req.body.option.round}',
-        '${req.body.option.time * 1000}'
+        '${option.round}',
+        '${option.time * 1000}'
     );`)
     res.redirect(`/g/${roomId}`)
 })
