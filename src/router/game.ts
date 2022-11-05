@@ -4,53 +4,48 @@ import config from "@lib/config.json"
 import * as NLog from "@lib/NyLog"
 import db from "@lib/db"
 import Game from "@lib/types/game"
-import ko_KR from "@lib/lang/ko_KR.json"
 
+// 디코 로그인 추가
 const wssv = new wsModule.Server({
     port: config.GAME_PORT
 })
 const rooms: Game.Rooms = {}
-const ko_KR_category: {[x: string]: {name: string, description: string}} = ko_KR.category
 wssv.on("connection", async (ws, req) => {
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
     NLog.Log("Connect game server", { ip: ip })
     
-    ws.on("message", (e) => {
+    ws.on("message", async (e) => {
         const data = JSON.parse(e.toString())
         const myroom = rooms[data.id]
         // console.log(data)
         switch (data.type) {
             case "start": {
-                db.query(`SELECT * FROM games WHERE ID = '${data.id}' LIMIT 1;`, (err, rows: Game.RoomsDB[], fields) => {
-                    const row: Game.RoomsDB = JSON.parse(JSON.stringify(rows[0]))
-                    myroom.categories = JSON.parse(row.CATEGORY)
-                    const category: string = randomArray(JSON.parse(row.CATEGORY)).toString()
-                    db.query(`SELECT WORD FROM words WHERE CATEGORY = '${category}' ORDER BY RAND() LIMIT 1;`, (errt, rows, fieldst) => {
-                        const row = JSON.parse(JSON.stringify(rows[0]))
-                        myroom.answer = row.WORD
-                        myroom.category = ko_KR_category[category].name
-                        send({
-                            type: "start",
-                            word: cho_hangul(row.WORD)
-                        }, data.id)
-                    })
-                })
+                const room = await db.getRoomById(data.id)
+                const categories = JSON.parse(room.CATEGORY)
+                myroom.categories = categories
+                const category: string = randomArray(categories)
+                const word = await db.getRandomWordByCategory(category)
+                myroom.answer = word
+                myroom.category = await db.getCategoryNameByCategoryId(category)
+                await send({
+                    type: "start",
+                    word: cho_hangul(word)
+                }, data.id)
                 break;
             }
             case "answer": {
                 if (myroom.answer === data.value) {
                     myroom.exp += (data.value.length * 5 + rand(0, 10))
                     myroom.time -= (myroom.time - data.time)
-                    console.log(data)
-                    console.log(myroom)
                     if (myroom.now_round === myroom.max_round) {
-                        send({
+                        myroom.now_round++
+                        await send({
                             type: "finish"
                         }, data.id)
                     }
                     else {
                         myroom.now_round++
-                        send({
+                        await send({
                             type: "correct",
                             value: true
                         }, data.id)
@@ -58,7 +53,7 @@ wssv.on("connection", async (ws, req) => {
                 }
                 else {
                     myroom.wrong++
-                    send({
+                    await send({
                         type: "correct",
                         value: false
                     }, data.id)
@@ -67,7 +62,7 @@ wssv.on("connection", async (ws, req) => {
                 break
             }
             case "timeout":
-                send({
+                await send({
                     type: "finish"
                 }, data.id)
                 break
@@ -79,7 +74,7 @@ wssv.on("connection", async (ws, req) => {
     ws.on("close", (code) => {
         NLog.Log("Disconnect game server", { ip: ip, code: code })
     })
-    function send(data: Game.WsSend, id?: string) {
+    async function send(data: Game.WsSend, id?: string) {
         if (id) {
             const myroom = rooms[id]
             data.category = myroom.category
@@ -88,13 +83,9 @@ wssv.on("connection", async (ws, req) => {
             data.exp = myroom.exp
             data.max_round = myroom.max_round
             data.time = myroom.time
-            const categories: string[] = []
-            myroom.categories!.forEach(v => {
-                categories.push(ko_KR_category[v].name)
-            });
+            const categories = await db.getCategoriesNameByCategoriesId(myroom.categories!)
             data.categories = categories
-            const accuracy = (myroom.now_round / (myroom.wrong + myroom.max_round))
-            console.log(accuracy)
+            const accuracy = ((myroom.now_round - 1) / (myroom.wrong + myroom.max_round))
             data.dam = Math.round((9160 * accuracy) / myroom.def_time * (myroom.time === myroom.def_time ? 0 : myroom.time))
         }
         ws.send(JSON.stringify(data))
@@ -112,24 +103,23 @@ wssv.on("connection", async (ws, req) => {
 })
 const router = express.Router()
 
-router.get("/:roomId", (req, res) => {
-    db.query(`SELECT * FROM games WHERE ID = '${req.params.roomId}' LIMIT 1;`, (e, rows: Game.RoomsDB[]) => {
-        if (rows.length === 0) return res.sendStatus(404)
-        rooms[req.params.roomId] = {
-            answer: undefined,
-            category: undefined,
-            exp: 0,
-            wrong: 0,
-            now_round: 1,
-            max_round: rows[0].ROUND,
-            time: rows[0].TIME,
-            def_time: rows[0].TIME,
-            categories: undefined
-        }
-        return res.render("game", {
-            ko_KR,
-            ws: `ws://${req.get("host")}:${config.GAME_PORT}`
-        })
+router.get("/:roomId", async (req, res) => {
+    const room = await db.getRoomById(req.params.roomId)
+    if (room.length === 0) return res.sendStatus(404)
+    console.log(room)
+    rooms[req.params.roomId] = {
+        answer: undefined,
+        category: undefined,
+        exp: 0,
+        wrong: 0,
+        now_round: 1,
+        max_round: room.ROUND,
+        time: room.TIME,
+        def_time: room.TIME,
+        categories: undefined
+    }
+    return res.render("game", {
+        ws: `ws://${req.get("host")}:${config.GAME_PORT}`
     })
 })
 

@@ -15,7 +15,9 @@ app.use("/g", require("@router/game"))
 
 
 app.get("/", async (req, res) => {
-    res.render("main", require("@lib/lang/ko_KR.json"))
+    res.render("main", {
+        categories: await db.getCategories()
+    })
 })
 
 app.post("/tryMakeGame", async (req, res) => {
@@ -32,19 +34,7 @@ app.post("/tryMakeGame", async (req, res) => {
     const sha1 = crypto.createHash("sha1")
     sha1.update(`${rand(0, 999)}${category[0]}`)
     const roomId = sha1.digest("hex")
-    db.query(`INSERT INTO games (
-        ID,
-        CATEGORY,
-        ROUND,
-        TIME
-    )
-    VALUES
-    (
-        '${roomId}',
-        '${JSON.stringify(category)}',
-        '${option.round}',
-        '${option.time * 1000}'
-    );`)
+    await db.generateRoom(roomId, category, option.round, option.time * 1000)
     res.redirect(`/g/${roomId}`)
 })
 

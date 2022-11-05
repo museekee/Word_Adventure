@@ -1,11 +1,6 @@
 export = Game
+
 declare namespace Game {
-    interface RoomsDB {
-        ID: string;
-        CATEGORY: string;
-        ROUND: number;
-        TIME: number;
-    }
     interface Rooms {
         [x: string]: {
             answer: string | undefined;

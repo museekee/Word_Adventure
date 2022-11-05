@@ -22,10 +22,10 @@ html
                 button 
                     img(src="/assets/images/shop.svg")
         #Categories
-            - for (id in category)
-                dama-leaf(data-category=id onclick="category_click(this)")
-                    span.Categories-leaf-title.Categories-leaf-text=category[id]["name"]
-                    span.Categories-leaf-description.Categories-leaf-text=category[id]["description"]
+            each item in categories
+                dama-leaf(data-category=item["ID"] onclick="category_click(this)")
+                    span.Categories-leaf-title.Categories-leaf-text=item["NAME"]
+                    span.Categories-leaf-description.Categories-leaf-text=item["DESCRIPTION"]
         #Game-option 
             h1 게임 설정
             div 

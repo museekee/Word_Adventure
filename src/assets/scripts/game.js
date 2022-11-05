@@ -96,7 +96,7 @@ ws.onmessage = async e => {
             if (ForP === "fail") Elements.Result.ForP.style.width = "200px"
             else Elements.Result.ForP.style.width = "250px"
             Elements.Result.ForP.setAttribute("src", `/assets/images/${ForP}.svg`)
-            const accuracy = (data.now_round / (data.wrong + data.max_round)) * 100
+            const accuracy = ((data.now_round - 1) / (data.wrong + data.max_round)) * 100
             Elements.Result.AccuracyValue.innerText = `${Math.round(accuracy * 100)/100}%`
             Elements.Result.AccuracyValue.style.width = `${accuracy}%`
             Elements.Result.WrongValue.innerText = `${data.wrong}개`
