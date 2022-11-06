@@ -103,5 +103,5 @@ dist
 # TernJS port file
 .tern-port
 
-.src/lib/config.json
-.src/lib/auth.json
+/src/lib/config.json
+/src/lib/auth.json
