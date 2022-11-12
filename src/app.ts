@@ -32,8 +32,19 @@ app.use((req, res, next) => {
 app.use("/account", require("@router/auth"))
 
 app.get("/", async (req, res) => {
+    const sess: Auth.Session = req.session
+    const user = {
+        exp: 0,
+        money: 0
+    }
+    if (sess.user) {
+        const { EXP, MONEY } = await DB.getUserById(sess.user.id)
+        user.exp = EXP
+        user.money = MONEY
+    }
     res.render("main", {
-        categories: await DB.getCategories()
+        categories: await DB.getCategories(),
+        user
     })
 })
 

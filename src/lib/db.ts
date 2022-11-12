@@ -92,6 +92,15 @@ export async function isExistId(id: string) {
     if (rows.length === 0) return false
     else return true
 }
+export async function setUserExpAndMoney(id: string, exp: number, money: number) {
+    const conn = await pool.getConnection()
+    await conn.query(`UPDATE users
+    SET 
+        EXP = EXP + ${conn.escape(exp)},
+        MONEY = MONEY + ${conn.escape(money)}
+    WHERE ID = ${conn.escape(id)};`)
+    conn.release()
+}
 export {
     pool
 }

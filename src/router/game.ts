@@ -16,7 +16,7 @@ const rooms: Game.Rooms = {}
 wssv.on("connection", async (ws, req) => {
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
     NLog.Log("Connect game server", { ip: ip })
-    
+
     ws.on("message", async (e) => {
         const data = JSON.parse(e.toString())
         const myroom = rooms[data.id]
@@ -31,8 +31,7 @@ wssv.on("connection", async (ws, req) => {
                 myroom.answer = word
                 myroom.category = await DB.getCategoryNameByCategoryId(category)
                 await send({
-                    type: "start",
-                    word: cho_hangul(word)
+                    type: "start"
                 }, data.id)
                 break;
             }
@@ -45,6 +44,7 @@ wssv.on("connection", async (ws, req) => {
                         await send({
                             type: "finish"
                         }, data.id)
+                        await finish(data.id)
                     }
                     else {
                         myroom.now_round++
@@ -68,6 +68,7 @@ wssv.on("connection", async (ws, req) => {
                 await send({
                     type: "finish"
                 }, data.id)
+                await finish(data.id)
                 break
         }
     })
@@ -80,16 +81,20 @@ wssv.on("connection", async (ws, req) => {
     async function send(data: Game.WsSend, id?: string) {
         if (id) {
             const myroom = rooms[id]
-            data.category = myroom.category
-            data.wrong = myroom.wrong
-            data.now_round = myroom.now_round
-            data.exp = myroom.exp
-            data.max_round = myroom.max_round
-            data.time = myroom.time
             const categories = await DB.getCategoriesNameByCategoriesId(myroom.categories!)
-            data.categories = categories
             const accuracy = ((myroom.now_round - 1) / (myroom.wrong + myroom.max_round))
-            data.dam = Math.round((9160 * accuracy) / myroom.def_time * (myroom.time === myroom.def_time ? 0 : myroom.time))
+            myroom.money = Math.round((9160 * accuracy) / myroom.def_time * myroom.time)
+            data.room = {
+                question: cho_hangul(myroom.answer!),
+                category: myroom.category!,
+                exp: myroom.exp,
+                wrong: myroom.wrong,
+                now_round: myroom.now_round,
+                max_round: myroom.max_round,
+                time: myroom.time,
+                categories: categories,
+                money: myroom.money
+            }
         }
         ws.send(JSON.stringify(data))
     }
@@ -102,6 +107,10 @@ wssv.on("connection", async (ws, req) => {
           else result += str.charAt(i);
         }
         return result;
+    }
+    async function finish(id: string) {
+        const myroom = rooms[id]
+        DB.setUserExpAndMoney(JSON.parse((await DB.getRoomById(id)).PLAYER)[0], myroom.exp, myroom.money)
     }
 })
 const router = express.Router()
@@ -120,7 +129,7 @@ router.use((req, res, next) => {
 })
 router.get("/:roomId", async (req, res) => {
     const room = await DB.getRoomById(req.params.roomId)
-    if (room.length === 0) return res.sendStatus(404)
+    if (!room) return res.sendStatus(404)
     console.log(room)
     rooms[req.params.roomId] = {
         answer: undefined,
@@ -131,7 +140,8 @@ router.get("/:roomId", async (req, res) => {
         max_round: room.ROUND,
         time: room.TIME,
         def_time: room.TIME,
-        categories: undefined
+        categories: undefined,
+        money: 0,
     }
     return res.render("game", {
         ws: `ws://${req.get("host")}:${config.GAME_PORT}`
