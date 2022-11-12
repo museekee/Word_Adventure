@@ -2,8 +2,11 @@ import express from "express"
 import config from "@lib/config.json"
 import path from "path"
 import * as NyLog from "@lib/NyLog"
-import db from "@lib/db"
+import * as DB from "@lib/db"
+import session from "express-session"
+const MySQLStore = require("express-mysql-session")(session)
 import crypto from "crypto"
+import Auth from "@lib/types/auth"
 
 const app = express()
 
@@ -11,17 +14,32 @@ app.set("view engine", "pug")
 app.set("views",  path.join(__dirname, "views"))
 app.use(express.json())
 app.use("/assets", express.static(path.join(__dirname, "assets")))
+app.use("/favicon.ico", express.static(path.join(__dirname, "assets/images/favicon.ico")))
 app.use("/g", require("@router/game"))
-
+const sessionStore = new MySQLStore({}, DB.pool)
+app.use(session({
+    secret: config.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    store: sessionStore
+}))
+app.use((req, res, next) => {
+    const sess: Auth.Session = req.session
+    res.locals.session = sess
+    console.log(sess)
+    next()
+})
+app.use("/account", require("@router/auth"))
 
 app.get("/", async (req, res) => {
     res.render("main", {
-        categories: await db.getCategories()
+        categories: await DB.getCategories()
     })
 })
 
 app.post("/tryMakeGame", async (req, res) => {
     const category: string[] = []
+    const sess: Auth.Session = req.session
     for (const key in req.body.category) {
         if (req.body.category[key]) category.push(key)
     }
@@ -34,8 +52,10 @@ app.post("/tryMakeGame", async (req, res) => {
     const sha1 = crypto.createHash("sha1")
     sha1.update(`${rand(0, 999)}${category[0]}`)
     const roomId = sha1.digest("hex")
-    await db.generateRoom(roomId, category, option.round, option.time * 1000)
-    res.redirect(`/g/${roomId}`)
+    if (!sess.isLogin) return res.status(403).send({reason: "No Login"}) 
+    if (!sess.user?.id) return 
+    await DB.generateRoom(roomId, category, [sess.user.id], option.round, option.time * 1000)
+    return res.redirect(`/g/${roomId}`)
 })
 
 app.listen(config.PORT, () => {

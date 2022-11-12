@@ -1,7 +1,0 @@
-{
-    "google": {
-        "clientID": "",
-        "clientSecret": "",
-        "callback": "/login/google/callback"
-    }
-}

@@ -5,6 +5,7 @@ declare namespace DB {
     interface Room extends RowDataPacket {
         ID: string;
         CATEGORY: string;
+        PLAYER: string;
         ROUND: number;
         TIME: number;
     }
@@ -16,5 +17,13 @@ declare namespace DB {
         ID: string;
         NAME: string;
         DESCRIPTION: string;
+    }
+    interface Users extends RowDataPacket {
+        ID: string;
+        PW: string;
+        NICK: string;
+        EXP: number;
+        MONEY: number;
+        ITEM: string;
     }
 }

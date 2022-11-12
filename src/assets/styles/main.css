@@ -1,10 +1,13 @@
 body {
     margin: 0;
+}
+#main {
     background: url("/assets/images/background.png");
     background-repeat: no-repeat;
     background-size: cover;
     display: grid;
     align-items: start;
+    height: calc(100% - 50px);
     grid-template-columns: 660px 1fr 300px;
     grid-template-rows: 1fr 125px;
 }

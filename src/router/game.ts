@@ -2,8 +2,11 @@ import express from "express"
 import wsModule from "ws"
 import config from "@lib/config.json"
 import * as NLog from "@lib/NyLog"
-import db from "@lib/db"
+import * as DB from "@lib/db"
 import Game from "@lib/types/game"
+import Auth from "@lib/types/auth"
+import session from "express-session"
+const MySQLStore = require("express-mysql-session")(session)
 
 // 디코 로그인 추가
 const wssv = new wsModule.Server({
@@ -20,13 +23,13 @@ wssv.on("connection", async (ws, req) => {
         // console.log(data)
         switch (data.type) {
             case "start": {
-                const room = await db.getRoomById(data.id)
+                const room = await DB.getRoomById(data.id)
                 const categories = JSON.parse(room.CATEGORY)
                 myroom.categories = categories
                 const category: string = randomArray(categories)
-                const word = await db.getRandomWordByCategory(category)
+                const word = await DB.getRandomWordByCategory(category)
                 myroom.answer = word
-                myroom.category = await db.getCategoryNameByCategoryId(category)
+                myroom.category = await DB.getCategoryNameByCategoryId(category)
                 await send({
                     type: "start",
                     word: cho_hangul(word)
@@ -83,7 +86,7 @@ wssv.on("connection", async (ws, req) => {
             data.exp = myroom.exp
             data.max_round = myroom.max_round
             data.time = myroom.time
-            const categories = await db.getCategoriesNameByCategoriesId(myroom.categories!)
+            const categories = await DB.getCategoriesNameByCategoriesId(myroom.categories!)
             data.categories = categories
             const accuracy = ((myroom.now_round - 1) / (myroom.wrong + myroom.max_round))
             data.dam = Math.round((9160 * accuracy) / myroom.def_time * (myroom.time === myroom.def_time ? 0 : myroom.time))
@@ -102,9 +105,21 @@ wssv.on("connection", async (ws, req) => {
     }
 })
 const router = express.Router()
-
+const sessionStore = new MySQLStore({}, DB.pool)
+router.use(session({
+    secret: config.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    store: sessionStore
+}))
+router.use((req, res, next) => {
+    const sess: Auth.Session = req.session
+    res.locals.session = sess
+    console.log(sess)
+    next()
+})
 router.get("/:roomId", async (req, res) => {
-    const room = await db.getRoomById(req.params.roomId)
+    const room = await DB.getRoomById(req.params.roomId)
     if (room.length === 0) return res.sendStatus(404)
     console.log(room)
     rooms[req.params.roomId] = {

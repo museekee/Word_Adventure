@@ -8,59 +8,90 @@ const pool = maria.createPool({
     password: config.MARIA_PASS,
     database: config.MARIA_DB,
 })
-const getCategories = async () => {
+export async function getCategories() {
     const conn = await pool.getConnection()
-    const [rows, fields]: [DB.Categories[], FieldPacket[]] = await conn.query(`SELECT * FROM categories`)
+    const [rows]: [DB.Categories[], FieldPacket[]] = await conn.query(`SELECT * FROM categories`)
     conn.release()
     return rows
 }
-const generateRoom = async (id: string, categories: string[], round: number, time: number) => {
+export async function generateRoom(id: string, categories: string[], player: string[], round: number, time: number) {
     const conn = await pool.getConnection()
+    console.log(
+        conn.escape(id),
+        conn.escape(JSON.stringify(categories)),
+        conn.escape(JSON.stringify(player)),
+        conn.escape(round),
+        conn.escape(time))
     await conn.query(`INSERT INTO games (
         ID,
         CATEGORY,
+        PLAYER,
         ROUND,
         TIME
     )
     VALUES
     (
-        '${id}',
-        '${JSON.stringify(categories)}',
-        '${round}',
-        '${time}'
+        ${conn.escape(id)},
+        ${conn.escape(JSON.stringify(categories))},
+        ${conn.escape(JSON.stringify(player))},
+        ${conn.escape(round)},
+        ${conn.escape(time)}
     );`)
     conn.release()
 }
-const getRoomById = async (id: string) => {
+export async function getRoomById(id: string) {
     const conn = await pool.getConnection()
-    const [rows, fields]: [DB.Room[], FieldPacket[]] = await conn.query(`SELECT * FROM games WHERE ID = '${id}' LIMIT 1;`)
+    const [rows]: [DB.Room[], FieldPacket[]] = await conn.query(`SELECT * FROM games WHERE ID = ${conn.escape(id)} LIMIT 1;`)
     conn.release()
     return rows[0]
 }
-const getRandomWordByCategory = async (category: string) => {
+export async function getRandomWordByCategory(category: string) {
     const conn = await pool.getConnection()
-    const [rows, fields]: [DB.Word[], FieldPacket[]] = await conn.query(`SELECT WORD FROM words WHERE CATEGORY = '${category}' ORDER BY RAND() LIMIT 1;`)
+    const [rows]: [DB.Word[], FieldPacket[]] = await conn.query(`SELECT WORD FROM words WHERE CATEGORY = ${conn.escape(category)} ORDER BY RAND() LIMIT 1;`)
     conn.release()
     return rows[0].WORD
 }
-const getCategoryNameByCategoryId = async (category: string) => {
+export async function getCategoryNameByCategoryId(category: string) {
     const conn = await pool.getConnection()
-    const [rows, fields]: [DB.Categories[], FieldPacket[]] = await conn.query(`SELECT NAME FROM categories WHERE ID = '${category}' LIMIT 1;`)
+    const [rows]: [DB.Categories[], FieldPacket[]] = await conn.query(`SELECT NAME FROM categories WHERE ID = ${conn.escape(category)} LIMIT 1;`)
     conn.release()
     return rows[0].NAME
 }
-const getCategoriesNameByCategoriesId = async (categories: string[]) => {
+export async function getCategoriesNameByCategoriesId(categories: string[]) {
     const names: string[] = []
     for (const v of categories) {
         names.push(await getCategoryNameByCategoryId(v))
     }
     return names
 }
-export = {
-    getCategories,
-    generateRoom,
-    getRoomById,
-    getRandomWordByCategory,
-    getCategoryNameByCategoryId,
-    getCategoriesNameByCategoriesId
+export async function getUserById(id: string) {
+    const conn = await pool.getConnection()
+    const [rows]: [DB.Users[], FieldPacket[]] = await conn.query(`SELECT * FROM users WHERE ID = ${conn.escape(id)}`)
+    conn.release()
+    return rows[0]
+}
+export async function joinUser(id: string, pw: string, nick: string) {
+    const conn = await pool.getConnection()
+    await conn.query(`INSERT INTO users (
+        ID,
+        PW,
+        NICK
+    )
+    VALUES
+    (
+        ${conn.escape(id)},
+        ${conn.escape(pw)},
+        ${conn.escape(nick)}
+    )`)
+    conn.release()
+}
+export async function isExistId(id: string) {
+    const conn = await pool.getConnection()
+    const [rows]: [DB.Users[], FieldPacket[]] = await conn.query(`SELECT * FROM users WHERE ID = ${conn.escape(id)}`)
+    conn.release()
+    if (rows.length === 0) return false
+    else return true
+}
+export {
+    pool
 }

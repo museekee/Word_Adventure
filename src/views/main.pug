@@ -1,41 +1,42 @@
+include header
 html 
     head 
-        script(src="/assets/scripts/swal.js")
         script(src="/assets/scripts/main.js")
         link(rel="stylesheet", href="/assets/styles/main.css")
         link(rel="stylesheet", href="/assets/styles/scrollbar.css")
         title 워드 어드벤처
     body
-        #Profile
-            h1#Nickname 내 캐릭터
-            #Exp
-                #Exp-bar
-                    | 00000━12345
-                    #Exp-bar-value
-                span EXP
-            #Ziu
-                img.Ziu#Ziu-body(src="/assets/images/ziu/body/def.svg")
-                img.Ziu#Ziu-eye(src="/assets/images/ziu/eye/def.svg")
-                img.Ziu#Ziu-mouse(src="/assets/images/ziu/mouse/def.svg")
-                img.Ziu#Ziu-clothes(src="/assets/images/ziu/clothes/def.svg")
-            #Buttons 
-                button 
-                    img(src="/assets/images/shop.svg")
-        #Categories
-            each item in categories
-                dama-leaf(data-category=item["ID"] onclick="category_click(this)")
-                    span.Categories-leaf-title.Categories-leaf-text=item["NAME"]
-                    span.Categories-leaf-description.Categories-leaf-text=item["DESCRIPTION"]
-        #Game-option 
-            h1 게임 설정
-            div 
-                h2 라운드
-                span 
-                    input#Round(type="number", value="10", max="50")
-                    span 라운드
-            div 
-                h2 시간
-                span 
-                    input#Time(type="number", value="200", max="500")
-                    span 초
-        button(onclick="gameMake()")#Game-make 게임 시작
+        #main
+            #Profile
+                h1#Nickname 내 캐릭터
+                #Exp
+                    #Exp-bar
+                        | 00000━12345
+                        #Exp-bar-value
+                    span EXP
+                #Ziu
+                    img.Ziu#Ziu-body(src="/assets/images/ziu/body/def.svg")
+                    img.Ziu#Ziu-eye(src="/assets/images/ziu/eye/def.svg")
+                    img.Ziu#Ziu-mouse(src="/assets/images/ziu/mouse/def.svg")
+                    img.Ziu#Ziu-clothes(src="/assets/images/ziu/clothes/def.svg")
+                #Buttons 
+                    button 
+                        img(src="/assets/images/shop.svg")
+            #Categories
+                each item in categories
+                    dama-leaf(data-category=item["ID"] onclick="category_click(this)")
+                        span.Categories-leaf-title.Categories-leaf-text=item["NAME"]
+                        span.Categories-leaf-description.Categories-leaf-text=item["DESCRIPTION"]
+            #Game-option 
+                h1 게임 설정
+                div 
+                    h2 라운드
+                    span 
+                        input#Round(type="number", value="10", max="50")
+                        span 라운드
+                div 
+                    h2 시간
+                    span 
+                        input#Time(type="number", value="200", max="500")
+                        span 초
+            button(onclick="gameMake()")#Game-make 게임 시작
