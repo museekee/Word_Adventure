@@ -8,7 +8,6 @@ import Auth from "@lib/types/auth"
 import session from "express-session"
 const MySQLStore = require("express-mysql-session")(session)
 
-// 디코 로그인 추가
 const wssv = new wsModule.Server({
     port: config.GAME_PORT
 })
@@ -124,7 +123,6 @@ router.use(session({
 router.use((req, res, next) => {
     const sess: Auth.Session = req.session
     res.locals.session = sess
-    console.log(sess)
     next()
 })
 router.get("/:roomId", async (req, res) => {

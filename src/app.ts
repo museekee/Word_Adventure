@@ -1,7 +1,7 @@
 import express from "express"
 import config from "@lib/config.json"
 import path from "path"
-import * as NyLog from "@lib/NyLog"
+import * as NLog from "@lib/NyLog"
 import * as DB from "@lib/db"
 import session from "express-session"
 const MySQLStore = require("express-mysql-session")(session)
@@ -26,7 +26,6 @@ app.use(session({
 app.use((req, res, next) => {
     const sess: Auth.Session = req.session
     res.locals.session = sess
-    console.log(sess)
     next()
 })
 app.use("/account", require("@router/auth"))
@@ -69,8 +68,28 @@ app.post("/tryMakeGame", async (req, res) => {
     return res.redirect(`/g/${roomId}`)
 })
 
+app.get("/shop/:category", async (req, res) => {
+    NLog.Log("Get shop items", {
+        category: req.params.category
+    })
+    return res.send(await DB.getShopItemsByCategory(req.params.category))
+})
+
+app.get("/profile", async (req, res) => {
+    const sess: Auth.Session = req.session
+    if (!sess.user?.id) return res.sendStatus(404)
+    const profile = await DB.getUserById(sess.user.id)
+    return res.send({
+        id: profile.ID,
+        nick: profile.NICK,
+        exp: profile.EXP,
+        money: profile.MONEY,
+        item: profile.ITEM
+    })
+})
+
 app.listen(config.PORT, () => {
-    NyLog.Success(`Express server launched on ${config.PORT}`)
+    NLog.Success(`Express server launched on ${config.PORT}`)
 })
 
 function rand(min: number, max: number): number {

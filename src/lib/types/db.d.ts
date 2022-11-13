@@ -26,4 +26,12 @@ declare namespace DB {
         MONEY: number;
         ITEM: string;
     }
+    interface Shop extends RowDataPacket {
+        ID: string;
+        NAME: string;
+        DESCRIPTION: string;
+        CATEGORY: string;
+        PRICE: number;
+        IMG_TYPE: string;
+    }
 }

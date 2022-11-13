@@ -1,6 +1,9 @@
 include header
+-
+    const SHOP_CATEGORIES = ["all", "body", "eye", "mouth", "ear", "clothes", "glasses", "hat", "hand"]
+    const SHOP_ICONS = ["📚", "몸", "👁️", "👄", "👂", "👕", "👓", "🧢", "🖐️"]
 html 
-    head 
+    head
         script(src="/assets/scripts/main.js")
         link(rel="stylesheet", href="/assets/styles/main.css")
         link(rel="stylesheet", href="/assets/styles/scrollbar.css")
@@ -17,8 +20,12 @@ html
                 #Ziu
                     img.Ziu#Ziu-body(src="/assets/images/ziu/body/def.svg")
                     img.Ziu#Ziu-eye(src="/assets/images/ziu/eye/def.svg")
-                    img.Ziu#Ziu-mouse(src="/assets/images/ziu/mouse/def.svg")
+                    img.Ziu#Ziu-mouth(src="/assets/images/ziu/mouth/def.svg")
+                    img.Ziu#Ziu-ear(src="")
                     img.Ziu#Ziu-clothes(src="/assets/images/ziu/clothes/def.svg")
+                    img.Ziu#Ziu-glasses(src="")
+                    img.Ziu#Ziu-hat(src="")
+                    img.Ziu#Ziu-hand(src="")
                 #Dam
                     #Dam-bar-back.bar-back
                         #Dam-bar.bar(style="height: 100%;")
@@ -45,5 +52,9 @@ html
                         span 
                             input#Time(type="number", value="200", max="500")
                             span 초
-                button(onclick="gameMake()")#Game-make 게임 시작 
+                button#Game-make(onclick="gameMake()") 게임 시작 
             #Shop
+                #Shop-items
+                #Shop-categories
+                    - for (let i = 0; i < SHOP_CATEGORIES.length; i++) 
+                        button(id=`Shop-${SHOP_CATEGORIES[i]}` onclick=`getShop("${SHOP_CATEGORIES[i]}")`)=SHOP_ICONS[i]

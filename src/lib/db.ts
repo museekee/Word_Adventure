@@ -16,12 +16,6 @@ export async function getCategories() {
 }
 export async function generateRoom(id: string, categories: string[], player: string[], round: number, time: number) {
     const conn = await pool.getConnection()
-    console.log(
-        conn.escape(id),
-        conn.escape(JSON.stringify(categories)),
-        conn.escape(JSON.stringify(player)),
-        conn.escape(round),
-        conn.escape(time))
     await conn.query(`INSERT INTO games (
         ID,
         CATEGORY,
@@ -100,6 +94,19 @@ export async function setUserExpAndMoney(id: string, exp: number, money: number)
         MONEY = MONEY + ${conn.escape(money)}
     WHERE ID = ${conn.escape(id)};`)
     conn.release()
+}
+export async function getShopItemsByCategory(category: string) {
+    const conn = await pool.getConnection()
+    if (category === "all") {
+        const [rows]: [DB.Shop[], FieldPacket[]] = await conn.query(`SELECT * FROM shop;`)
+        conn.release()
+        return rows
+    }
+    else {
+        const [rows]: [DB.Shop[], FieldPacket[]] = await conn.query(`SELECT * FROM shop WHERE CATEGORY = ${conn.escape(category)};`)
+        conn.release()
+        return rows
+    }
 }
 export {
     pool
