@@ -36,16 +36,16 @@ wssv.on("connection", async (ws, req) => {
             }
             case "answer": {
                 if (myroom.answer === data.value) {
-                    myroom.exp += (data.value.length * 5 + rand(0, 10))
                     myroom.time -= (myroom.time - data.time)
+                    console.log(myroom.now_round, myroom.max_round)
                     if (myroom.now_round === myroom.max_round) {
-                        myroom.now_round++
                         await send({
                             type: "finish"
                         }, data.id)
                         await finish(data.id)
                     }
                     else {
+                        myroom.exp += (data.value.length * 5 + rand(0, 10))
                         myroom.now_round++
                         await send({
                             type: "correct",
@@ -109,7 +109,7 @@ wssv.on("connection", async (ws, req) => {
     }
     async function finish(id: string) {
         const myroom = rooms[id]
-        DB.setUserExpAndMoney(JSON.parse((await DB.getRoomById(id)).PLAYER)[0], myroom.exp, myroom.money)
+        DB.setUserExpAndMoney((await DB.getRoomById(id)).PLAYER, myroom.exp, myroom.money)
     }
 })
 const router = express.Router()

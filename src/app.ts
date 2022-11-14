@@ -64,7 +64,7 @@ app.post("/tryMakeGame", async (req, res) => {
     const roomId = sha1.digest("hex")
     if (!sess.isLogin) return res.status(403).send({reason: "No Login"}) 
     if (!sess.user?.id) return 
-    await DB.generateRoom(roomId, category, [sess.user.id], option.round, option.time * 1000)
+    await DB.generateRoom(roomId, category, sess.user.id, option.round, option.time * 1000)
     return res.redirect(`/g/${roomId}`)
 })
 
