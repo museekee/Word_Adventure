@@ -1,6 +1,7 @@
 import maria, { FieldPacket } from "mysql2/promise"
 import config from "@lib/config.json"
 import DB from "./types/db"
+import Auth from "./types/auth"
 
 const pool = maria.createPool({
     host: config.MARIA_HOST,
@@ -8,6 +9,19 @@ const pool = maria.createPool({
     password: config.MARIA_PASS,
     database: config.MARIA_DB,
 })
+export async function isExistSession(sid: string) {
+    const conn = await pool.getConnection()
+    const [rows]: [DB.Session[], FieldPacket[]] = await conn.query(`SELECT session_id from sessions WHERE session_id = ${conn.escape(sid)}`)
+    conn.release()
+    return rows.length === 0 ? false : true
+}
+export async function getSessionDataBySessionId(sid: string) {
+    const conn = await pool.getConnection()
+    const [rows]: [DB.Session[], FieldPacket[]] = await conn.query(`SELECT data FROM sessions WHERE session_id = ${conn.escape(sid)}`)
+    conn.release()
+    const data: Auth.DB_SessionData = JSON.parse(rows[0].data)
+    return data
+}
 export async function getCategories() {
     const conn = await pool.getConnection()
     const [rows]: [DB.Categories[], FieldPacket[]] = await conn.query(`SELECT * FROM categories`)

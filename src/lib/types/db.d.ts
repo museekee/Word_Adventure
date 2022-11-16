@@ -2,6 +2,11 @@ import { FieldPacket, RowDataPacket } from "mysql2/promise"
 export = DB
 
 declare namespace DB {
+    interface Session extends RowDataPacket {
+        session_id: string;
+        expires: number;
+        data: string;
+    }
     interface Room extends RowDataPacket {
         ID: string;
         CATEGORY: string;

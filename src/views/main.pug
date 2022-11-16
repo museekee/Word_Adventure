@@ -4,10 +4,12 @@ include header
     const SHOP_ICONS = ["📚", "몸", "👁️", "👄", "👂", "👕", "👓", "🧢", "🖐️"]
 html 
     head
-        script(src="/assets/scripts/main.js")
+        script(src="/socket.io/socket.io.js")
+        script(src="/assets/scripts/main.js" defer)
         link(rel="stylesheet", href="/assets/styles/main.css")
         link(rel="stylesheet", href="/assets/styles/scrollbar.css")
         title 워드 어드벤처
+        #sessionId(style="display: none;")=sessionId
     body
         #main
             #Profile
