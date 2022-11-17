@@ -12,17 +12,11 @@ export default async (socket: SessionSocket) => {
     const sess = await DB.getSessionDataBySessionId(sessionId)
     if (!sess.user) return
     const userId = sess.user.id
-    const profile = await DB.getUserById(userId)
-    send("profile", {
-        id: profile.ID,
-        nick: profile.NICK,
-        exp: profile.EXP,
-        money: profile.MONEY,
-        item: profile.ITEM
-    })
+    
     send("getShop", {
         shop: await DB.getShopItemsByCategory("all")
     })
+    send("profile", await getProfile())
     socket.on('disconnect', () => {
         NLog.Log("disconnected client", {
             in: "lobby websocket",
@@ -63,21 +57,35 @@ export default async (socket: SessionSocket) => {
             shop: await DB.getShopItemsByCategory(data.value)
         })
     })
+    socket.on("buyShopItem", async e => {
+        const data: { value: string } = JSON.parse(e)
+        const item = await DB.getShopItemById(data.value)
+        const profile = await getProfile()
+        if (profile.money < item.PRICE) return send("buyShopItem", {
+            result: false,
+            reason: "잔액이 부족합니다."
+        })
+        await DB.buyItem(item.ID, userId)
+        return send("buyShopItem", {
+            result: true
+        })
+    })
     socket.on("getProfile", async () => {
         send("profile", getProfile())
     })
     async function getProfile() {
-        if (!socket.request.session.user) return
-        const profile = await DB.getUserById(socket.request.session.user.id)
+        const profile = await DB.getUserById(userId)
         return {
             id: profile.ID,
             nick: profile.NICK,
             exp: profile.EXP,
             money: profile.MONEY,
-            item: profile.ITEM
+            item: profile.ITEM,
+            equip: JSON.parse(profile.EQUIP)
         }
     }
     async function send(type: string, data: any) {
+        socket.emit("profile", JSON.stringify(await getProfile()))
         socket.emit(type, JSON.stringify(data))
     }
 }

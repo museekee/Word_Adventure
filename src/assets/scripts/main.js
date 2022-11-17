@@ -1,12 +1,19 @@
 const selectedCategory = {}
 const $data = {
     sessionId: document.getElementById("sessionId").innerText,
-    profile: undefined
+    profile: undefined,
+    shop: undefined
 };
+const elements = {
+    damBar: document.getElementById("Dam-bar"),
+    damBarValue: document.getElementById("Dam-bar-value"),
+    expBar: document.getElementById("Exp-bar"),
+    expBarValue: document.getElementById("Exp-bar-value"),
+    ziu: document.getElementById("Ziu")
+}
 
 const socket = io.connect(`http://localhost/?session=${$data.sessionId}`)
 /**
- * 
  * @param {HTMLElement} elem
  */
 
@@ -26,7 +33,8 @@ const socket = io.connect(`http://localhost/?session=${$data.sessionId}`)
 })
 socket.on("profile", async e => {
     $data.profile = JSON.parse(e)
-    console.log($data)
+    console.log(JSON.parse(e))
+    renderProfile()
 })
 socket.on("getShop", async e => {
     /**
@@ -44,6 +52,9 @@ socket.on("getShop", async e => {
      * }}
      */
     const data = JSON.parse(e)
+    console.log(data.shop)
+    data.shop.forEach(console.log)
+    $data.shop = data.shop
     const shopItems = document.getElementById("Shop-items")
     shopItems.innerHTML = ""
     data.shop.forEach(item => {
@@ -61,7 +72,25 @@ socket.on("getShop", async e => {
         shopItem.dataset.id = item.ID
         shopItem.setAttribute("onmouseover", "onMouseOver_ShopItem(this)")
         shopItem.setAttribute("onmouseout", "onMouseOut_ShopItem()")
+        shopItem.setAttribute("onclick", "onClick_ShopItem(this)")
         shopItems.appendChild(shopItem)
+    })
+})
+socket.on("buyShopItem", async e => {
+    const data = JSON.parse(e)
+    if (!data.result) {
+        return await swal.fire({
+            title: "오류!",
+            html: `구매 중 오류가 발생하였습니다.<br/>reason : ${data.reason}`,
+            icon: "error",
+            confirmButtonText: '확인'
+        })
+    }
+    await swal.fire({
+        title: "성공!",
+        text: "구매에 성공하였습니다!",
+        icon: "success",
+        confirmButtonText: '확인'
     })
 })
 async function gameMake() {
@@ -84,7 +113,6 @@ function category_click(elem) {
     }
 }
 /**
- * 
  * @param {string} id 
  */
 async function getShop(id) {
@@ -95,19 +123,61 @@ function send(type, data) {
     return socket.emit(type, JSON.stringify(data))
 }
 /**
- * 
  * @param {HTMLElement} elem 
  */
  async function onMouseOver_ShopItem(elem) {
-    const damBar = document.getElementById("Dam-bar")
-    const damBarValue = document.getElementById("Dam-bar-value")
     const price = elem.dataset.price
-    damBarValue.innerText = `${$data.profile.money}━${price}`
-    damBar.style.height = `${($data.profile.money / price) * 100}%`
+    elements.damBarValue.innerText = `${$data.profile.money}━${price}`
+    elements.damBar.style.height = `${($data.profile.money / price) * 100}%`
 }
 async function onMouseOut_ShopItem() {
-    const damBar = document.getElementById("Dam-bar")
-    const damBarValue = document.getElementById("Dam-bar-value")
-    damBarValue.innerText = `${$data.profile.money}━${$data.profile.money}`
-    damBar.style.height = `100%`
+    elements.damBarValue.innerText = `${$data.profile.money}━${$data.profile.money}`
+    elements.damBar.style.height = `100%`
+}
+/**
+ * @param {HTMLElement} elem 
+ */
+ async function onClick_ShopItem(elem) {
+    const price = elem.dataset.price
+    const id = elem.dataset.id
+    if((await swal.fire({
+        title: "상점",
+        html: `정말로 구매하시겠습니까?<br/>
+        상품 가격 : ${price} 현재 담 : ${$data.profile.money} 구매 후 : ${$data.profile.money - price}`,
+        icon: 'question',
+        showDenyButton: true,
+        confirmButtonText: '예',
+        denyButtonText: '아니요'
+    })).value) {
+        send("buyShopItem", {
+            value: id
+        })
+    }
+}
+async function renderProfile() {
+    elements.damBarValue.innerText = `${$data.profile.money}━${$data.profile.money}`
+    elements.damBar.style.height = `100%`
+    elements.expBarValue.innerText = `${$data.profile.exp}`
+    elements.expBar.style.height = `100%`
+    const ITEM_CATEGORIES = ["body", "eye", "mouth", "ear", "clothes", "glasses", "hat", "hand"]
+    ITEM_CATEGORIES.forEach(category => {
+        console.log(category)
+        console.log($data.profile.equip)
+        const equipItem = $data.profile.equip[category]
+        console.log(equipItem)
+        if (equipItem) {
+            const img = document.createElement("img")
+            img.setAttribute("id", `Ziu-${category}`)
+            img.setAttribute("class", `Ziu`)
+            img.setAttribute("src", `/ziu/${equipItem}`)
+            elements.ziu.appendChild(img)
+        }
+        else {
+            const img = document.createElement("img")
+            img.setAttribute("id", `Ziu-${category}`)
+            img.setAttribute("class", `Ziu`)
+            img.setAttribute("src", `/assets/images/ziu/${category}/def.svg`)
+            elements.ziu.appendChild(img)
+        }
+    })
 }

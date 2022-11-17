@@ -122,6 +122,27 @@ export async function getShopItemsByCategory(category: string) {
         return rows
     }
 }
+export async function getShopItemById(id: string) {
+    const conn = await pool.getConnection()
+    const [rows]: [DB.Shop[], FieldPacket[]] = await conn.query(`SELECT * FROM shop WHERE ID = ${conn.escape(id)}`)
+    conn.release()
+    return rows[0]
+}
+export async function buyItem(itemId: string, userId: string) {
+    const conn = await pool.getConnection()
+    const item = await getShopItemById(itemId)
+    const user_inv: DB.UserItem = JSON.parse((await getUserById(userId)).ITEM)
+    if (!user_inv[item.CATEGORY]) user_inv[item.CATEGORY] = {} // 카테고리도 없는 쌩 초보 계정일 때
+    if (!user_inv[item.CATEGORY][itemId]) user_inv[item.CATEGORY][itemId] = {
+        num: 0
+    } // 카테고리는 있으나, 이 아이템은 처음 구매할 때
+    user_inv[item.CATEGORY][itemId].num++
+    await conn.query(`UPDATE users
+    SET
+        MONEY = MONEY + ${conn.escape(-item.PRICE)},
+        ITEM = ${conn.escape(JSON.stringify(user_inv))}
+    WHERE ID = '${userId}';`)
+}
 export {
     pool
 }

@@ -30,6 +30,7 @@ declare namespace DB {
         EXP: number;
         MONEY: number;
         ITEM: string;
+        EQUIP: string;
     }
     interface Shop extends RowDataPacket {
         ID: string;
@@ -38,5 +39,15 @@ declare namespace DB {
         CATEGORY: string;
         PRICE: number;
         IMG_TYPE: string;
+    }
+    interface UserItem {
+        [x: string]: { // category_id
+            [x: string]: { // item_id
+                num: number; // 개수
+            }
+        };
+    }
+    interface UserEquip {
+        [x: string]: string // category_id: item_id
     }
 }

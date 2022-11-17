@@ -6,7 +6,7 @@ import * as DB from "@lib/db"
 import session from "express-session"
 const MySQLStore = require("express-mysql-session")(session)
 import Auth from "@lib/types/auth"
-import socketio, { Socket } from "socket.io"
+import socketio from "socket.io"
 import { SessionSocket } from "@lib/types/app"
 import appSocket from "sockets/app.socket"
 
@@ -36,18 +36,23 @@ app.get("/", async (req, res) => {
     const sess = req.session
     const user = {
         exp: 0,
-        money: 0
+        money: 0,
+        item: {}
     }
     if (sess.user) {
-        const { EXP, MONEY } = await DB.getUserById(sess.user.id)
-        user.exp = EXP
-        user.money = MONEY
+        const dbUser = await DB.getUserById(sess.user.id)
+        user.exp = dbUser.EXP
+        user.money = dbUser.MONEY
     }
     res.render("main", {
         categories: await DB.getCategories(),
         user,
         sessionId: req.session.id
     })
+})
+app.get("/ziu/:itemId", async (req, res) => {
+    const item = await DB.getShopItemById(req.params.itemId)
+    return res.sendFile(path.join(__dirname, `/assets/images/ziu/${item.CATEGORY}/${item.ID}.${item.IMG_TYPE}`))
 })
 
 const server = app.listen(config.PORT, () => {
@@ -60,6 +65,3 @@ io.on("connection", async (defsocket) => {
     NLog.Log("Connect lobby server", { ip: ip })
     appSocket(socket)
 })
-function rand(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min)) + min;
-}
