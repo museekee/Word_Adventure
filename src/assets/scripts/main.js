@@ -166,10 +166,12 @@ async function onMouseOut_ShopItem() {
     }
 }
 async function renderProfile() {
+    //* set exp and dam
     elements.profile.damBarValue.innerText = `${$data.profile.money}━${$data.profile.money}`
     elements.profile.damBar.style.height = `100%`
     elements.profile.expBarValue.innerText = `${$data.profile.exp}`
     elements.profile.expBar.style.height = `100%`
+    //* set ziu
     const ITEM_CATEGORIES = ["body", "eye", "mouth", "ear", "clothes", "glasses", "hat", "hand"]
     ITEM_CATEGORIES.forEach(category => {
         const equipItem = $data.profile.equip[category]
@@ -182,11 +184,32 @@ async function renderProfile() {
             elements.dialog.profile.charactor.miniZiu.innerHTML += `<img id="Ziu-${category}" class="Ziu MiniZiu" src="/assets/images/ziu/${category}/def.svg"/>`
         }
     })
+    //* nickname
     elements.dialog.profile.charactor.nickname.value = $data.profile.nick
+    //* inventory
+    elements.dialog.profile.inventory.innerHTML = ""
     for (const category in $data.profile.item) {
-        const item = $data.profile.item[category]
-        if (item.num <= 0) continue
-        
+        for (const id in $data.profile.item[category]) {
+            const item  = $data.profile.item[category][id]
+            if (item.num <= 0) continue
+            elements.dialog.profile.inventory.innerHTML += `<dama-item data-invId="${id}">
+                <img src="/ziu/${id}"/>
+                <span>${item.num}</span>
+            </dama-item>`
+            console.log(id)
+        }
+    }
+    for (const category in $data.profile.equip) {
+        const id = $data.profile.equip[category]
+        if ($data.profile.item[category][id]) {
+            document.querySelector(`[data-invId="${id}"]`).setAttribute("class", "eqiupedItem")
+        }
+        else {
+            elements.dialog.profile.inventory.innerHTML += `<dama-item class="equipedItem" data-invId="${id}">
+                <img src="/ziu/${id}"/>
+                <span>0</span>
+            </dama-item>`
+        }
     }
     console.log($data.profile.item)
 }
