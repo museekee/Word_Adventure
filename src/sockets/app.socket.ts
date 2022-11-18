@@ -80,7 +80,7 @@ export default async (socket: SessionSocket) => {
             nick: profile.NICK,
             exp: profile.EXP,
             money: profile.MONEY,
-            item: profile.ITEM,
+            item: JSON.parse(profile.ITEM),
             equip: JSON.parse(profile.EQUIP)
         }
     }

@@ -2,11 +2,11 @@
  * 
  * @param {string} id 
  */
-function showDialog(id) {
+function __showDialog__(id) {
     const dialog = document.getElementById(`__${id}Back__`)
     dialog.style.display = "flex"
 }
-function closeDialog(id) {
+function __closeDialog__(id) {
     const dialog = document.getElementById(`__${id}Back__`)
     dialog.style.display = "none"
 }

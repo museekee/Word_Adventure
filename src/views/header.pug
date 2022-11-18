@@ -10,7 +10,7 @@ mixin Dialog(id, w, h)
     .Dialog-hide-back(id=`__${id}Back__`)
         .Dialog(style=WidthHeight)
             .Dialog-head
-                .Dialog-head-close(onclick=`closeDialog('${id}')`) x
+                .Dialog-head-close(onclick=`__closeDialog__('${id}')`) x
             block
 body
     +Dialog("joinDialog", 700, 400)
@@ -43,7 +43,7 @@ body
         img#__logo__(src="/assets/images/logo.svg")
         #__profile__
             - if (!SESSION.isLogin)
-                span#__join__(onclick="showDialog('joinDialog')") 회원가입
-                span#__login__(onclick="showDialog('loginDialog')") 로그인
+                span#__join__(onclick="__showDialog__('joinDialog')") 회원가입
+                span#__login__(onclick="__showDialog__('loginDialog')") 로그인
             - else
                 span#__nickname__(onclick="logout()")=SESSION.user.nick

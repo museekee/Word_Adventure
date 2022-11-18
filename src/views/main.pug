@@ -11,6 +11,21 @@ html
         title 워드 어드벤처
         #sessionId(style="display: none;")=sessionId
     body
+        #dialogs
+            dialog#Profile-dialog(open style="width: 1000px; height: 600px;")
+                .dialog-header
+                    .dialog-close(onclick="document.getElementById('Profile-dialog').close()")
+                #Profile-dialog-main
+                    #Charactor
+                        #Mini-ziu
+                        input#Set-nickname(type="text")
+                    #Effect
+                        h2 효과
+                    #Inventory
+                        dama-item
+                            img(src="/assets/images/ziu/glasses/scouter.svg")
+                            span 123
+                
         #main
             #Profile
                 h1#Nickname 내 캐릭터
@@ -25,8 +40,10 @@ html
                         #Dam-bar.bar(style="height: 100%;")
                         span#Dam-bar-value.bar-value #{user.money}━#{user.money}
                     span 담
-                #Buttons 
-                    button 
+                #Menu
+                    button(onclick="onClick_Menu('shop')")
+                        img(src="/assets/images/shop.svg")
+                    button(onclick="onClick_Menu('profileSetting')")
                         img(src="/assets/images/shop.svg")
             #Game-menu(style="display: none;")
                 #Categories
