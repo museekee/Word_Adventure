@@ -73,6 +73,22 @@ export default async (socket: SessionSocket) => {
     socket.on("getProfile", async () => {
         send("profile", getProfile())
     })
+    socket.on("equipItem", async e => {
+        const data: { value: string } = JSON.parse(e)
+        switch (await DB.equipItem(data.value, userId)) {
+            case "Using":
+                return send("equipItem", {code: 403, value: "이미 장착중인 아이템입니다."})
+            case "Shortage":
+                return send("equipItem", {code: 403, value: "대체 어떤일을 벌이고 계시기에... 0개인 아이템을 갖고있는 것도 모자라, 사용까지 하려고 하시나요?"})
+            case "Success":
+                return send("equipItem", {code: 200, value: "성공적으로 장착하였습니다."})
+        }
+    })
+    socket.on("unEquipItem", async e => {
+        const data: { value: string } = JSON.parse(e)
+        await DB.unEquipItem(data.value, userId)
+        return send("unEquipItem", {code: 200, value: "성공적으로 장착 해제 하였습니다."})
+    })
     async function getProfile() {
         const profile = await DB.getUserById(userId)
         return {

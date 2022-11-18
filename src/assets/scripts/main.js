@@ -104,6 +104,32 @@ socket.on("buyShopItem", async e => {
         confirmButtonText: '확인'
     })
 })
+socket.on("equipItem", async e => {
+    const data = JSON.parse(e)
+    if (data.code === 403) {
+        return await swal.fire({
+            title: "오류!",
+            html: `아이템을 장착 중 오류가 발생했습니다.<br/>reason : ${data.value}`,
+            icon: "error",
+            confirmButtonText: "확인"
+        })
+    }
+    return await swal.fire({
+        title: "성공!",
+        text: data.value,
+        icon: "success",
+        confirmButtonText: "확인"
+    })
+})
+socket.on("unEquipItem", async e => {
+    const data = JSON.parse(e)
+    return await swal.fire({
+        title: "성공!",
+        text: data.value,
+        icon: "success",
+        confirmButtonText: "확인"
+    })
+})
 async function gameMake() {
     send("generateRoom", {
         category: selectedCategory,
@@ -128,6 +154,12 @@ function category_click(elem) {
  */
 async function getShop(id) {
     send("getShop", { value: id })
+}
+async function equipItem(itemId) {
+    send("equipItem", {value: itemId})
+}
+async function unEquipItem(itemId) {
+    send("unEquipItem", {value: itemId})
 }
 function send(type, data) {
     if (!data) return socket.emit(type, null)
@@ -172,6 +204,8 @@ async function renderProfile() {
     elements.profile.expBarValue.innerText = `${$data.profile.exp}`
     elements.profile.expBar.style.height = `100%`
     //* set ziu
+    elements.profile.ziu.innerHTML = ""
+    elements.dialog.profile.charactor.miniZiu.innerHTML = ""
     const ITEM_CATEGORIES = ["body", "eye", "mouth", "ear", "clothes", "glasses", "hat", "hand"]
     ITEM_CATEGORIES.forEach(category => {
         const equipItem = $data.profile.equip[category]
@@ -192,24 +226,26 @@ async function renderProfile() {
         for (const id in $data.profile.item[category]) {
             const item  = $data.profile.item[category][id]
             if (item.num <= 0) continue
-            elements.dialog.profile.inventory.innerHTML += `<dama-item data-invId="${id}">
+            elements.dialog.profile.inventory.innerHTML += `<dama-item data-invId="${id}" onclick="equipItem('${id}')">
                 <img src="/ziu/${id}"/>
                 <span>${item.num}</span>
             </dama-item>`
-            console.log(id)
         }
     }
     for (const category in $data.profile.equip) {
         const id = $data.profile.equip[category]
+        if (id === "") continue
         if ($data.profile.item[category][id]) {
-            document.querySelector(`[data-invId="${id}"]`).setAttribute("class", "eqiupedItem")
+            const item = document.querySelector(`[data-invId="${id}"]`)
+            item.setAttribute("class", "eqiupedItem")
+            item.setAttribute("onclick", `unEquipItem('${category}')`)
         }
+        // ^ 갖고있는 아이템인데 장착까지 했을 때
         else {
-            elements.dialog.profile.inventory.innerHTML += `<dama-item class="equipedItem" data-invId="${id}">
+            elements.dialog.profile.inventory.innerHTML += `<dama-item class="equipedItem" data-invId="${id}" onclick="unEquipItem('${category}')">
                 <img src="/ziu/${id}"/>
                 <span>0</span>
             </dama-item>`
         }
     }
-    console.log($data.profile.item)
 }

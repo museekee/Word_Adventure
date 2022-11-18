@@ -143,6 +143,63 @@ export async function buyItem(itemId: string, userId: string) {
         ITEM = ${conn.escape(JSON.stringify(user_inv))}
     WHERE ID = '${userId}';`)
 }
+/**
+ * 
+ * @param itemId 장착하기 윈하는 아이템
+ * @param userId 유저의 아이디
+ * @returns 결과
+ */
+export async function equipItem(itemId: string, userId: string): Promise<"Using" | "Shortage" | "Success"> {
+    const item = await getShopItemById(itemId)
+    {
+        const user = await getUserById(userId)
+        const equip: DB.UserEquip = JSON.parse(user.EQUIP)
+        const userItem: DB.UserItem = JSON.parse(user.ITEM)
+        for (const [key, value] of Object.entries(equip)) {
+            if (value === itemId) return "Using"
+        }
+        // ^ 사용중(같은 것을 이미 착용 중)
+        if (userItem[item.CATEGORY][itemId].num <= 0) return "Shortage"
+        // ^ 어떤 이유에서인지 아이템을 0개 갖고있을 때
+        if (equip[item.CATEGORY])
+            await unEquipItem(item.CATEGORY, userId, true)
+            // ^ 아이템 장착 해제
+        // ^ 장착한 아이템이 있으면
+    }
+    // ! 검사 완료
+    const conn = await pool.getConnection()
+    const user = await getUserById(userId)
+    const userItem: DB.UserItem = JSON.parse(user.ITEM)
+    const equip: DB.UserEquip = JSON.parse(user.EQUIP)
+    userItem[item.CATEGORY][itemId].num--
+    // ^ 장착하고 싶은 아이템 뺏기(-1)
+    equip[item.CATEGORY] = itemId
+    // ^ 아이템 장착시키기
+    conn.query(`UPDATE users
+    SET
+        EQUIP = ${conn.escape(JSON.stringify(equip))},
+        ITEM = ${conn.escape(JSON.stringify(userItem))}
+    WHERE ID = ${conn.escape(userId)}`)
+    conn.release()
+    return "Success"
+}
+export async function unEquipItem(category: string, userId: string, quetly?: boolean) {
+    const conn = await pool.getConnection()
+    const user = await getUserById(userId)
+    const equip: DB.UserEquip = JSON.parse(user.EQUIP)
+    const item: DB.UserItem = JSON.parse(user.ITEM)
+    item[category][equip[category]].num++
+    // ^ 다시 돌려주기(+1)
+    equip[category] = ""
+    // ^ 돌려줬으니 없애기
+    conn.query(`UPDATE users
+    SET
+        ITEM = ${conn.escape(JSON.stringify(item))},
+        EQUIP = ${conn.escape(JSON.stringify(equip))}
+    WHERE ID = ${conn.escape(userId)}`)
+    conn.release()
+    if (!quetly) return true
+}
 export {
     pool
 }
