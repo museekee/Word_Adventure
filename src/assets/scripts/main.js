@@ -5,11 +5,24 @@ const $data = {
     shop: undefined
 };
 const elements = {
-    damBar: document.getElementById("Dam-bar"),
-    damBarValue: document.getElementById("Dam-bar-value"),
-    expBar: document.getElementById("Exp-bar"),
-    expBarValue: document.getElementById("Exp-bar-value"),
-    ziu: document.getElementById("Ziu")
+    profile: {
+        damBar: document.getElementById("Dam-bar"),
+        damBarValue: document.getElementById("Dam-bar-value"),
+        expBar: document.getElementById("Exp-bar"),
+        expBarValue: document.getElementById("Exp-bar-value"),
+        ziu: document.getElementById("Ziu")
+    },
+    dialog: {
+        profile: {
+            main: document.getElementById("Profile-dialog"),
+            charactor: {
+                miniZiu: document.getElementById("Mini-ziu"),
+                nickname: document.getElementById("Set-nickname")
+            },
+            effect: {},
+            inventory: document.getElementById("Inventory")
+        }
+    }
 }
 
 const socket = io.connect(`http://localhost/?session=${$data.sessionId}`)
@@ -33,7 +46,7 @@ const socket = io.connect(`http://localhost/?session=${$data.sessionId}`)
 })
 socket.on("profile", async e => {
     $data.profile = JSON.parse(e)
-    console.log(JSON.parse(e))
+    console.log($data.profile)
     renderProfile()
 })
 socket.on("getShop", async e => {
@@ -52,8 +65,6 @@ socket.on("getShop", async e => {
      * }}
      */
     const data = JSON.parse(e)
-    console.log(data.shop)
-    data.shop.forEach(console.log)
     $data.shop = data.shop
     const shopItems = document.getElementById("Shop-items")
     shopItems.innerHTML = ""
@@ -127,12 +138,12 @@ function send(type, data) {
  */
  async function onMouseOver_ShopItem(elem) {
     const price = elem.dataset.price
-    elements.damBarValue.innerText = `${$data.profile.money}━${price}`
-    elements.damBar.style.height = `${($data.profile.money / price) * 100}%`
+    elements.profile.damBarValue.innerText = `${$data.profile.money}━${price}`
+    elements.profile.damBar.style.height = `${($data.profile.money / price) * 100}%`
 }
 async function onMouseOut_ShopItem() {
-    elements.damBarValue.innerText = `${$data.profile.money}━${$data.profile.money}`
-    elements.damBar.style.height = `100%`
+    elements.profile.damBarValue.innerText = `${$data.profile.money}━${$data.profile.money}`
+    elements.profile.damBar.style.height = `100%`
 }
 /**
  * @param {HTMLElement} elem 
@@ -155,29 +166,27 @@ async function onMouseOut_ShopItem() {
     }
 }
 async function renderProfile() {
-    elements.damBarValue.innerText = `${$data.profile.money}━${$data.profile.money}`
-    elements.damBar.style.height = `100%`
-    elements.expBarValue.innerText = `${$data.profile.exp}`
-    elements.expBar.style.height = `100%`
+    elements.profile.damBarValue.innerText = `${$data.profile.money}━${$data.profile.money}`
+    elements.profile.damBar.style.height = `100%`
+    elements.profile.expBarValue.innerText = `${$data.profile.exp}`
+    elements.profile.expBar.style.height = `100%`
     const ITEM_CATEGORIES = ["body", "eye", "mouth", "ear", "clothes", "glasses", "hat", "hand"]
     ITEM_CATEGORIES.forEach(category => {
-        console.log(category)
-        console.log($data.profile.equip)
         const equipItem = $data.profile.equip[category]
-        console.log(equipItem)
         if (equipItem) {
-            const img = document.createElement("img")
-            img.setAttribute("id", `Ziu-${category}`)
-            img.setAttribute("class", `Ziu`)
-            img.setAttribute("src", `/ziu/${equipItem}`)
-            elements.ziu.appendChild(img)
+            elements.profile.ziu.innerHTML += `<img id="Ziu-${category}" class="Ziu" src="/ziu/${equipItem}"/>`
+            elements.dialog.profile.charactor.miniZiu.innerHTML += `<img id="Ziu-${category}" class="Ziu MiniZiu" src="/ziu/${equipItem}"/>`
         }
         else {
-            const img = document.createElement("img")
-            img.setAttribute("id", `Ziu-${category}`)
-            img.setAttribute("class", `Ziu`)
-            img.setAttribute("src", `/assets/images/ziu/${category}/def.svg`)
-            elements.ziu.appendChild(img)
+            elements.profile.ziu.innerHTML += `<img id="Ziu-${category}" class="Ziu" src="/assets/images/ziu/${category}/def.svg"/>`
+            elements.dialog.profile.charactor.miniZiu.innerHTML += `<img id="Ziu-${category}" class="Ziu MiniZiu" src="/assets/images/ziu/${category}/def.svg"/>`
         }
     })
+    elements.dialog.profile.charactor.nickname.value = $data.profile.nick
+    for (const category in $data.profile.item) {
+        const item = $data.profile.item[category]
+        if (item.num <= 0) continue
+        
+    }
+    console.log($data.profile.item)
 }
