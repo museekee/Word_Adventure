@@ -108,6 +108,7 @@ button {
 }
 #Menu > button {
     width: 70px;
+    margin: 0 10 0 10;
 }
 #Menu > button > img {
     width: 70px;
@@ -254,6 +255,11 @@ dialog {
     background: #000000;
     height: 50px;
     width: 100%;
+}
+.dialog-header > h1 {
+    display: inline-block;
+    color: #dd0000;
+    margin: 0 0 0 10;
 }
 .dialog-close {
     float: right;

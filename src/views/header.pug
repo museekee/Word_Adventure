@@ -21,10 +21,10 @@ body
                 input#____Jid____(maxlength='30')
                 h6 1~30자의 영숫자 또는 언더바
                 h2 비밀번호
-                input#____Jpw____(maxlength='128')
+                input#____Jpw____(type="password" maxlength='128')
                 h6 8~128자의 영숫자
                 h2 비밀번호 확인
-                input#____JpwC____(maxlength='128')
+                input#____JpwC____(type="password" maxlength='128')
                 h6 위 비밀번호
                 h2 닉네임
                 input#____Jnick____(maxlength='20')
@@ -37,7 +37,7 @@ body
                 h2 아이디
                 input#____Lid____(maxlength='30')
                 h2 비밀번호
-                input#____Lpw____(maxlength='128')
+                input#____Lpw____(type="password" maxlength='128')
                 button(onclick="login()") 로그인
     header#__header__
         img#__logo__(src="/assets/images/logo.svg")

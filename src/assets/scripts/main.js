@@ -12,6 +12,10 @@ const elements = {
         expBarValue: document.getElementById("Exp-bar-value"),
         ziu: document.getElementById("Ziu")
     },
+    board: {
+        gameMenu: document.getElementById("Game-menu"),
+        shop: document.getElementById("Shop")
+    },
     dialog: {
         profile: {
             main: document.getElementById("Profile-dialog"),
@@ -161,6 +165,17 @@ async function equipItem(itemId) {
 async function unEquipItem(itemId) {
     send("unEquipItem", {value: itemId})
 }
+async function onClick_Menu(id, isDialog) {
+    if (isDialog) {
+        elements.dialog[id].main.show()
+    }
+    else {
+        for (const [key, value] of Object.entries(elements.board)) {
+            value.style.display = "none"
+        }
+        elements.board[id].style.display = "grid"
+    }
+}
 function send(type, data) {
     if (!data) return socket.emit(type, null)
     return socket.emit(type, JSON.stringify(data))
@@ -225,7 +240,6 @@ async function renderProfile() {
     for (const category in $data.profile.item) {
         for (const id in $data.profile.item[category]) {
             const item  = $data.profile.item[category][id]
-            if (item.num <= 0) continue
             elements.dialog.profile.inventory.innerHTML += `<dama-item data-invId="${id}" onclick="equipItem('${id}')">
                 <img src="/ziu/${id}"/>
                 <span>${item.num}</span>
@@ -235,6 +249,7 @@ async function renderProfile() {
     for (const category in $data.profile.equip) {
         const id = $data.profile.equip[category]
         if (id === "") continue
+        console.log($data.profile.item[category])
         if ($data.profile.item[category][id]) {
             const item = document.querySelector(`[data-invId="${id}"]`)
             item.setAttribute("class", "eqiupedItem")

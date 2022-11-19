@@ -12,8 +12,9 @@ html
         #sessionId(style="display: none;")=sessionId
     body
         #dialogs
-            dialog#Profile-dialog(open style="width: 1000px; height: 600px;")
+            dialog#Profile-dialog(style="width: 1000px; height: 600px;")
                 .dialog-header
+                    h1 !오류로 인해 아이템이 갑자기 없어지더라도 보상 안함!
                     .dialog-close(onclick="document.getElementById('Profile-dialog').close()")
                 #Profile-dialog-main
                     #Charactor
@@ -29,7 +30,7 @@ html
                 #Exp
                     #Exp-bar-back.bar-back
                         #Exp-bar.bar(style="height: 100%;")
-                        span#Exp-bar-value.bar-value #{user.exp}━12345
+                        span#Exp-bar-value.bar-value #{user.exp}
                     span EXP
                 #Ziu
                 #Dam
@@ -38,33 +39,37 @@ html
                         span#Dam-bar-value.bar-value #{user.money}━#{user.money}
                     span 담
                 #Menu
+                    button(onclick="onClick_Menu('gameMenu')")
+                        img(src="/assets/images/home.svg")
                     button(onclick="onClick_Menu('shop')")
                         img(src="/assets/images/shop.svg")
-                    button(onclick="onClick_Menu('profileSetting')")
-                        img(src="/assets/images/shop.svg")
-            #Game-menu(style="display: none;")
-                #Categories
-                    each item in categories
-                        dama-leaf(data-category=item["ID"] onclick="category_click(this)")
-                            span.Categories-leaf-title.Categories-leaf-text=item["NAME"]
-                            span.Categories-leaf-description.Categories-leaf-text=item["DESCRIPTION"]
-                #Game-option 
-                    h1 게임 설정
-                    div 
-                        h2 라운드
-                        span 
-                            input#Round(type="number", value="10", max="50")
-                            span 라운드
-                    div 
-                        h2 시간
-                        span 
-                            input#Time(type="number", value="200", max="500")
-                            span 초
-                button#Game-make(onclick="gameMake()") 게임 시작
+                    button(onclick="onClick_Menu('profile', true)")
+                        img(src="/assets/images/profile.svg")
             - if (SESSION.isLogin)
-                #Shop
+                #Game-menu
+                    #Categories
+                        each item in categories
+                            dama-leaf(data-category=item["ID"] onclick="category_click(this)")
+                                span.Categories-leaf-title.Categories-leaf-text=item["NAME"]
+                                span.Categories-leaf-description.Categories-leaf-text=item["DESCRIPTION"]
+                    #Game-option 
+                        h1 게임 설정
+                        div 
+                            h2 라운드
+                            span 
+                                input#Round(type="number", value="10", max="50")
+                                span 라운드
+                        div 
+                            h2 시간
+                            span 
+                                input#Time(type="number", value="200", max="500")
+                                span 초
+                    button#Game-make(onclick="gameMake()") 게임 시작
+                #Shop(style="display: none;")
                     #Shop-items
                     #Shop-categories
                         button#Shop-all(onclick='getShop("all")') 📚
                         - for (let i = 0; i < SHOP_CATEGORIES.length; i++) 
                             button(id=`Shop-${SHOP_CATEGORIES[i]}` onclick=`getShop("${SHOP_CATEGORIES[i]}")`)=SHOP_ICONS[i]
+            - else
+                h1 게임을 즐기시려면 로그인을 해야 합니다.
