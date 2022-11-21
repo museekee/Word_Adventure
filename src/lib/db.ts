@@ -32,7 +32,7 @@ export async function generateRoom(id: string, categories: string[], player: str
     const conn = await pool.getConnection()
     await conn.query(`INSERT INTO games (
         ID,
-        CATEGORY,
+        CATEGORIES,
         PLAYER,
         NOW_TIME,
         TIME,
@@ -54,7 +54,7 @@ export async function updateRoomByNewRound(rid: string, nowCategory: string, now
     await conn.query(`UPDATE games
     SET
         NOW_CATEGORY = ${conn.escape(nowCategory)},
-        NOW_ANSWER = ${conn.escape(nowAnswer)}
+        ANSWER = ${conn.escape(nowAnswer)}
     WHERE
         ID = ${conn.escape(rid)}`)
     conn.release()
@@ -66,7 +66,7 @@ export async function updateRoomByRoomData(roomData: DB.Room) {
         NOW_ROUND = ${conn.escape(roomData.NOW_ROUND)},
         NOW_CATEGORY = ${conn.escape(roomData.NOW_CATEGORY)},
         NOW_TIME = ${conn.escape(roomData.NOW_TIME)},
-        ANSWER = ${conn.escape(roomData.ANSWER)}
+        ANSWER = ${conn.escape(roomData.ANSWER)},
         WRONG = ${conn.escape(roomData.WRONG)},
         EXP = ${conn.escape(roomData.EXP)},
         MONEY = ${conn.escape(roomData.MONEY)}

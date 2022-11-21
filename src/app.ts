@@ -77,6 +77,6 @@ io.on("connection", async (defsocket) => {
     else if (roomId) {
         if (!(typeof roomId == "string")) return
         socket.join(roomId)
-        gameSocket(socket, userId, roomId)
+        gameSocket(io, socket, userId, roomId)
     }
 })

@@ -1,17 +1,24 @@
 import { SessionSocket } from "@lib/types/app"
 import * as DB from "@lib/db"
+import SocketIO from "socket.io"
 
-export default async (socket: SessionSocket, userId: string, roomId: string) => {
+export default async (io: SocketIO.Server, socket: SessionSocket, userId: string, roomId: string) => {
     const room = await DB.getRoomById(roomId)
-    const categories: string[] = JSON.parse(room.CATEGORY)
-
-    socket.on("newRound", async () => {
-        const category: string = categories[Math.floor(Math.random()*categories.length)]
-        const word = await DB.getRandomWordByCategory(category)
-        await DB.updateRoomByNewRound(room.ID, category, word)
-        send("newRound", {
-            question: cho_hangul(word),
-            nowRound: room.NOW_ROUND,
+    console.log(room)
+    const categories: string[] = JSON.parse(room.CATEGORIES)
+    
+    await send("init", {
+        maxRound: room.ROUND,
+        maxTime: room.TIME,
+        nowRound: room.NOW_ROUND
+    })
+    async function newRound() {
+        room.NOW_CATEGORY = categories[Math.floor(Math.random()*categories.length)]
+        room.ANSWER = await DB.getRandomWordByCategory(room.NOW_CATEGORY)
+        console.log("dd", room)
+        await DB.updateRoomByNewRound(room.ID, room.NOW_CATEGORY, room.ANSWER)
+        await send("newRound", {
+            question: cho_hangul(room.ANSWER),
             nowCategory: room.NOW_CATEGORY
         })
         function cho_hangul(str: string) {
@@ -24,7 +31,9 @@ export default async (socket: SessionSocket, userId: string, roomId: string) => 
             }
             return result;
         }
-    })
+    }
+    await newRound()
+    socket.on("newRound", newRound)
     socket.on("answer", async e => {
         const data: {value: string, time: number} = JSON.parse(e)
         if (room.ANSWER === data.value) {
@@ -34,12 +43,12 @@ export default async (socket: SessionSocket, userId: string, roomId: string) => 
             else {
                 room.EXP += (data.value.length * 5 + rand(0, 10))
                 room.NOW_ROUND++
-                await send("correct", {value: true})
+                await send("correct", {value: true, answer: data.value})
             }
         }
         else {
             room.WRONG++
-            await send("correct", {value: false})
+            await send("correct", {value: false, answer: data.value})
         }
         console.log(room.ANSWER)
         await DB.updateRoomByRoomData(room)
@@ -49,15 +58,24 @@ export default async (socket: SessionSocket, userId: string, roomId: string) => 
     })
     async function finish() {
         await DB.setUserExpAndMoney(room.PLAYER, room.EXP, room.MONEY)
-        await send("finish")
+        await send("finish", room)
     }
     async function send(type: string, data?: any) {
-        socket.to(room.ID).emit("room", JSON.stringify({
+        const accuracy = ((room.NOW_ROUND - 1) / (room.WRONG + room.ROUND))
+        console.log(Math.round((9160 * accuracy) / room.TIME * room.NOW_TIME))
+        room.MONEY = Math.round((9160 * accuracy) / room.TIME * room.NOW_TIME)
+        await DB.updateRoomByRoomData(room)
+        io.to(room.ID).emit("room", JSON.stringify({
+            category: room.NOW_CATEGORY,
             wrong: room.WRONG,
             exp: room.EXP,
-            money: room.MONEY
+            money: room.MONEY,
+            nowRound: room.NOW_ROUND,
+            maxRound: room.ROUND,
+            allTime: room.TIME,
+            nowAllTime: room.NOW_TIME
         }))
-        socket.to(room.ID).emit(type, JSON.stringify(data))
+        io.to(room.ID).emit(type, JSON.stringify(data))
     }
     function rand(min: number, max: number) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
