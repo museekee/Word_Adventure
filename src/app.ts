@@ -9,6 +9,7 @@ import Auth from "@lib/types/auth"
 import socketio from "socket.io"
 import { SessionSocket } from "@lib/types/app"
 import appSocket from "sockets/app.socket"
+import gameSocket from "sockets/game.socket"
 
 const app = express()
 const sessionStore = new MySQLStore({}, DB.pool)
@@ -63,5 +64,19 @@ io.on("connection", async (defsocket) => {
     const socket = <SessionSocket> defsocket
     const ip = socket.handshake.headers['x-forwarded-for'] || socket.handshake.address
     NLog.Log("Connect lobby server", { ip: ip })
-    appSocket(socket)
+    const sessionId = socket.handshake.query.session
+    const roomId = socket.handshake.query.roomId
+    if (!(typeof sessionId == "string")) return
+    const existSid = await DB.isExistSession(sessionId)
+    if (!existSid) return
+    const sess = await DB.getSessionDataBySessionId(sessionId)
+    if (!sess.user) return
+    const userId = sess.user.id
+    if (!roomId)
+        appSocket(socket, userId)
+    else if (roomId) {
+        if (!(typeof roomId == "string")) return
+        socket.join(roomId)
+        gameSocket(socket, userId, roomId)
+    }
 })

@@ -3,16 +3,7 @@ import crypto from "crypto"
 import * as DB from "@lib/db"
 import * as NLog from "@lib/NyLog"
 
-export default async (socket: SessionSocket) => {
-    const sessionId = socket.handshake.query.session
-    if (!(typeof sessionId == "string")) return
-    console.log(sessionId)
-    const existSid = await DB.isExistSession(sessionId)
-    if (!existSid) return
-    const sess = await DB.getSessionDataBySessionId(sessionId)
-    if (!sess.user) return
-    const userId = sess.user.id
-    
+export default async (socket: SessionSocket, userId: string) => {
     send("getShop", {
         shop: await DB.getShopItemsByCategory("all")
     })
@@ -32,7 +23,6 @@ export default async (socket: SessionSocket) => {
                 time: number;
             }
         } = JSON.parse(e.toString())
-        if (!existSid) return send("generateRoom", {code: 403, value: "No Login"}) 
         const category: string[] = []
         for (const key in data.category) {
             if (data.category[key]) category.push(key)
@@ -46,9 +36,8 @@ export default async (socket: SessionSocket) => {
         const sha1 = crypto.createHash("sha1")
         sha1.update(`${rand(0, 999)}${category[0]}`)
         const roomId = sha1.digest("hex")
-        if (!sess.isLogin) return send("generateRoom", {code: 403, value: "No Login"}) 
-        if (!sess.user?.id) return
-        await DB.generateRoom(roomId, category, sess.user!.id, option.round, option.time * 1000)
+        if (!userId) return send("generateRoom", {code: 403, value: "No Login"}) 
+        await DB.generateRoom(roomId, category, userId, option.round, option.time * 1000)
         return send("generateRoom", {code: 200, value: `/g/${roomId}`})
     })
     socket.on("getShop", async e => {

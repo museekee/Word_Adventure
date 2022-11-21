@@ -109,7 +109,7 @@ wssv.on("connection", async (ws, req) => {
     }
     async function finish(id: string) {
         const myroom = rooms[id]
-        DB.setUserExpAndMoney((await DB.getRoomById(id)).PLAYER, myroom.exp, myroom.money)
+        await DB.setUserExpAndMoney((await DB.getRoomById(id)).PLAYER, myroom.exp, myroom.money)
     }
 })
 const router = express.Router()
@@ -128,6 +128,7 @@ router.use((req, res, next) => {
 router.get("/:roomId", async (req, res) => {
     const room = await DB.getRoomById(req.params.roomId)
     if (!room) return res.sendStatus(404)
+    if (!req.session.user) return res.sendStatus(403)
     console.log(room)
     rooms[req.params.roomId] = {
         answer: undefined,
@@ -142,7 +143,9 @@ router.get("/:roomId", async (req, res) => {
         money: 0,
     }
     return res.render("game", {
-        ws: `ws://${req.get("host")}:${config.GAME_PORT}`
+        ws: `ws://${req.get("host")}:${config.GAME_PORT}`,
+        sessionId: req.session.user.id,
+        roomId: req.params.roomId
     })
 })
 

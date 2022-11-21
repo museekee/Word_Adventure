@@ -29,7 +29,7 @@ const elements = {
     }
 }
 
-const socket = io.connect(`http://localhost/?session=${$data.sessionId}`)
+const socket = io.connect(`http://localhost`, {query: {session: $data.sessionId}})
 /**
  * @param {HTMLElement} elem
  */

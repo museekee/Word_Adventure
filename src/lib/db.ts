@@ -34,17 +34,44 @@ export async function generateRoom(id: string, categories: string[], player: str
         ID,
         CATEGORY,
         PLAYER,
-        ROUND,
-        TIME
+        NOW_TIME,
+        TIME,
+        ROUND
     )
     VALUES
     (
         ${conn.escape(id)},
         ${conn.escape(JSON.stringify(categories))},
         ${conn.escape(player)},
-        ${conn.escape(round)},
-        ${conn.escape(time)}
+        ${conn.escape(time)},
+        ${conn.escape(time)},
+        ${conn.escape(round)}
     );`)
+    conn.release()
+}
+export async function updateRoomByNewRound(rid: string, nowCategory: string, nowAnswer: string) {
+    const conn = await pool.getConnection()
+    await conn.query(`UPDATE games
+    SET
+        NOW_CATEGORY = ${conn.escape(nowCategory)},
+        NOW_ANSWER = ${conn.escape(nowAnswer)}
+    WHERE
+        ID = ${conn.escape(rid)}`)
+    conn.release()
+}
+export async function updateRoomByRoomData(roomData: DB.Room) {
+    const conn = await pool.getConnection()
+    await conn.query(`UPDATE games
+    SET
+        NOW_ROUND = ${conn.escape(roomData.NOW_ROUND)},
+        NOW_CATEGORY = ${conn.escape(roomData.NOW_CATEGORY)},
+        NOW_TIME = ${conn.escape(roomData.NOW_TIME)},
+        ANSWER = ${conn.escape(roomData.ANSWER)}
+        WRONG = ${conn.escape(roomData.WRONG)},
+        EXP = ${conn.escape(roomData.EXP)},
+        MONEY = ${conn.escape(roomData.MONEY)}
+    WHERE
+        ID = ${conn.escape(roomData.ID)}`)
     conn.release()
 }
 export async function getRoomById(id: string) {

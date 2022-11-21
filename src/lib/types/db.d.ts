@@ -9,10 +9,17 @@ declare namespace DB {
     }
     interface Room extends RowDataPacket {
         ID: string;
-        CATEGORY: string;
+        CATEGORIES: string;
         PLAYER: string;
-        ROUND: number;
+        NOW_ROUND: number;
+        NOW_CATEGORY: string;
+        NOW_TIME: number;
+        ANSWER: string;
+        WRONG: number;
+        EXP: number;
+        MONEY: number;
         TIME: number;
+        ROUND: number;
     }
     interface Word extends RowDataPacket {
         WORD: string;
