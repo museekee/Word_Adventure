@@ -12,6 +12,7 @@ const Elements = {
         ForP: document.getElementById("ForP"),
         AccuracyValue: document.getElementById("Accuracy_value"),
         WrongValue: document.getElementById("Wrong_value"),
+        PlayerValue: document.getElementById("Player_value"),
         CategoryValue: document.getElementById("Category_value"),
         RuleValue: document.getElementById("Rule_value"),
         ExpValue: document.getElementById("Exp_value"),
@@ -43,34 +44,26 @@ const $data = {
     timer: undefined
 }
 const socket = io.connect(`${$data.wsUrl}`, {query: {session: $data.sessionId, roomId: $data.roomId}})
-// const config = {
-//     AllTime: undefined,
-//     RoundTime: undefined,
-//     DefAllTime: undefined,
-//     DefRoundTime: undefined,
-//     TICK: 10
-// }
 
+async function timerCb() {
+    $data.room.time.nowAllTime -= $data.TICK;
+    $data.room.time.nowRoundTime -= $data.TICK;
+    if ($data.room.time.nowRoundTime <= 0) {
+        await send("timeout")
+        clearInterval($data.timer)
+    }
+    Elements.AllTimeValue.innerText = Math.round($data.room.time.nowAllTime*0.001)
+    Elements.AllTimeValue.style.height = `${$data.room.time.nowAllTime / $data.room.time.allTime * 100}%`
+    Elements.RoundTimeValue.innerText = Math.round($data.room.time.nowRoundTime*0.001)
+    Elements.RoundTimeValue.style.height = `${$data.room.time.nowRoundTime / $data.room.time.roundTime * 100}%`
+}
 socket.on("init", async e => {
     const data = JSON.parse(e)
     $data.room.maxRound = data.maxRound
     $data.room.nowRound = data.nowRound
     $data.room.time.allTime = data.maxTime
     $data.room.time.nowAllTime = $data.room.time.allTime
-    $data.timer = setInterval(() => {
-        $data.room.time.nowAllTime -= $data.TICK;
-        $data.room.time.nowRoundTime -= $data.TICK;
-        if ($data.room.time.nowRoundTime <= 0) {
-            send({
-                type: "timeout"
-            })
-            clearInterval(timer)
-        }
-        Elements.AllTimeValue.innerText = Math.round($data.room.time.nowAllTime*0.001)
-        Elements.AllTimeValue.style.height = `${$data.room.time.nowAllTime / $data.room.time.allTime * 100}%`
-        Elements.RoundTimeValue.innerText = Math.round($data.room.time.nowRoundTime*0.001)
-        Elements.RoundTimeValue.style.height = `${$data.room.time.nowRoundTime / $data.room.time.roundTime * 100}%`
-    }, $data.TICK)
+    $data.timer = setInterval(timerCb, $data.TICK)
 })
 socket.on("newRound", async e => {
     const data = JSON.parse(e)
@@ -80,11 +73,12 @@ socket.on("newRound", async e => {
     Elements.WordWrite.setAttribute("placeholder", $data.room.question)
     console.log($data)
     if (!$data.room.time.roundTime) $data.room.time.roundTime = $data.room.time.allTime / 2 // 라운드 타임 안 정해졌을 때
-    if ($data.room.time.roundTime > $data.room.time.allTime) $data.room.time.nowRoundTime = $data.room.time.nowAllTime // 남은 전체 타임이 라운드 타임보다 작을 때
+    if ($data.room.time.nowRoundTime > $data.room.time.nowAllTime) $data.room.time.nowRoundTime = $data.room.time.nowAllTime // 남은 전체 타임이 라운드 타임보다 작을 때
     else $data.room.time.nowRoundTime = $data.room.time.roundTime
 })
 socket.on("room", async e => {
     const data = JSON.parse(e)
+    $data.room.category = data.category
     $data.room.wrong = data.wrong
     $data.room.exp = data.exp
     $data.room.money = data.money
@@ -100,13 +94,17 @@ socket.on("correct", async e => {
     if (data.value) {
         Elements.Word.style.color = "#ffffff"
         Elements.Word.innerText = data.answer
+        clearInterval($data.timer)
         await sleep(1000)
+        $data.timer = setInterval(timerCb, $data.TICK)
         send("newRound")
     }
     else {
         Elements.Word.style.color = "#ff0000"
         Elements.Word.innerText = data.answer
+        clearInterval($data.timer)
         await sleep(1000)
+        $data.timer = setInterval(timerCb, $data.TICK)
         Elements.Word.style.color = "#ffffff"
         Elements.Word.innerText = $data.room.question
     }
@@ -116,50 +114,7 @@ socket.on("finish", async e => {
     clearInterval($data.timer)
     renderFinishByData(data)
 })
-// ws.onmessage = async e => {
-//     /**
-//      * @type {sendData}
-//      */
-//     const data = JSON.parse(e.data)
-//     renderDetailByData(data)
-//     switch (data.type) {
-//         case "start": 
-//             nowquestion = data.room.question
-//             Elements.Word.innerText = nowquestion
-//             Elements.WordWrite.setAttribute("placeholder", nowquestion)
-//             if (!config.DefAllTime) config.DefAllTime = data.room.time // 아무것도 안 되어있을 때
-//             config.AllTime = data.room.time
-//             if (!config.DefRoundTime) config.DefRoundTime = config.DefAllTime / 2 // 라운드 타임 안 정해졌을 때
-//             if (config.DefRoundTime > config.AllTime) config.RoundTime = config.AllTime // 남은 전체 타임이 라운드 타임보다 작을 때
-//             else config.RoundTime = config.DefRoundTime
-//             break
-//         case "correct": {
-//             Elements.WordWrite.value = ""
-//             if (data.value) {
-//                 Elements.Word.style.color = "#ffffff"
-//                 Elements.Word.innerText = myanswer
-//                 await sleep(1000)
-//                 send({
-//                     type: "start"
-//                 })
-//             }
-//             else {
-//                 Elements.Word.style.color = "#ff0000"
-//                 Elements.Word.innerText = myanswer
-//                 await sleep(1000)
-//                 Elements.Word.style.color = "#ffffff"
-//                 Elements.Word.innerText = nowquestion
-//             }
-//             break
-//         }
-//         case "finish": {
-//             clearInterval(timer)
-//             renderFinishByData(data)
-//             break
-//         }
-//     }
 
-// }
 function renderDetail() {
     Elements.Subject.innerText = $data.room.category
     Elements.Wrong.innerText = `${$data.room.wrong}번`
@@ -175,6 +130,7 @@ function renderFinishByData(data) {
     Elements.Result.AccuracyValue.innerText = `${Math.round(accuracy * 100)/100}%`
     Elements.Result.AccuracyValue.style.width = `${accuracy}%`
     Elements.Result.WrongValue.innerText = `${data.WRONG}개`
+    Elements.Result.PlayerValue.innerText = data.PLAYER
     Elements.Result.CategoryValue.innerText = JSON.parse(data.CATEGORIES).join("/")
     Elements.Result.RuleValue.innerText = "미구현"
     Elements.Result.ExpValue.innerText = `🟢 +${data.EXP}`

@@ -37,7 +37,7 @@ export default async (io: SocketIO.Server, socket: SessionSocket, userId: string
     socket.on("answer", async e => {
         const data: {value: string, time: number} = JSON.parse(e)
         if (room.ANSWER === data.value) {
-            room.NOW_TIME -= data.time
+            room.NOW_TIME = data.time
             if (room.NOW_ROUND === room.ROUND)
                 finish()
             else {
@@ -58,6 +58,7 @@ export default async (io: SocketIO.Server, socket: SessionSocket, userId: string
     })
     async function finish() {
         await DB.setUserExpAndMoney(room.PLAYER, room.EXP, room.MONEY)
+        room.CATEGORIES = JSON.stringify(await DB.getCategoriesNameByCategoriesId(JSON.parse(room.CATEGORIES)))
         await send("finish", room)
     }
     async function send(type: string, data?: any) {
@@ -65,8 +66,9 @@ export default async (io: SocketIO.Server, socket: SessionSocket, userId: string
         console.log(Math.round((9160 * accuracy) / room.TIME * room.NOW_TIME))
         room.MONEY = Math.round((9160 * accuracy) / room.TIME * room.NOW_TIME)
         await DB.updateRoomByRoomData(room)
+        console.log(room.NOW_CATEGORY)
         io.to(room.ID).emit("room", JSON.stringify({
-            category: room.NOW_CATEGORY,
+            category: room.NOW_CATEGORY ? await DB.getCategoryNameByCategoryId(room.NOW_CATEGORY) : null,
             wrong: room.WRONG,
             exp: room.EXP,
             money: room.MONEY,
