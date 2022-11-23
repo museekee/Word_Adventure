@@ -1,4 +1,3 @@
-// const fs = require("fs");
 const color = {
     Reset: "\x1B[0m",
     Bright: "\x1B[1m",
@@ -26,11 +25,6 @@ const color = {
     BgCyan: "\x1B[46m",
     BgWhite: "\x1B[47m"
 };
-// const startDate = new Date();
-// const fileName = `./logs/${startDate.getFullYear()} ${startDate.getMonth() + 1} ${startDate.getDate()}.json`;
-// (function() {
-//     if (!fs.existsSync(fileName)) fs.writeFileSync(fileName, "[]", "utf8");
-// })();
 /**
  * 
  * @param { number } type 0: Log / 1: Success / 2: Error
@@ -38,38 +32,34 @@ const color = {
  * @param { object? } add add other message
  */
 function CallLog(type: number, text: string, add?: object) {
-    let message;
+    const message = [];
     switch (type) {
         case 0:
-            message = `${color.FgWhite}📝 Log`;
+            message.push(`${color.FgWhite}📝 Log`);
             break;
         case 1:
-            message = `${color.FgGreen}✅ Success`;
+            message.push(`${color.FgGreen}✅ Success`);
             break;
         case 2:
-            message = `${color.FgRed}❌ Error`
+            message.push(`${color.FgRed}❌ Error`)
             break;
     }
     const date = new Date();
     const time = `${date.toLocaleDateString()} ${date.toLocaleTimeString()} (${Date.now()})`;
-    const data: data = Object.assign({
+    const data = Object.entries(Object.assign({
         type: type,
         message: text,
-        time: time 
-    }, add);
-    for (const value in data) {
-        const valueArr = data[value].toString().split("\n");
-        message += `\n├ ${value}: ${valueArr[0]}`;
-        for (let i = 0; i < valueArr.length; i++)
-            if (i !== 0) message += `\n│ ${valueArr[i]}`;
-    }
-    // const logfileJson = JSON.parse(fs.readFileSync(fileName, "utf8"));
-    // logfileJson.push(data)
-    // fs.writeFileSync(fileName, JSON.stringify(logfileJson, null, 4));
-    console.log(`${message}${color.Reset}`);
-}
-interface data {
-    [index: string]: string | number | boolean
+        time: time
+    }, add));
+    data.forEach(([key, value], idx) => {
+        const valueArr = value.toString().split("\n");
+        valueArr.forEach((content, idx2) => {
+            if (data.length-1=== idx && valueArr.length-1 === idx2) message.push(`└ ${key} : ${content}`);
+            else if (idx2 !== 0) message.push(`│ ${content}`); 
+            else message.push(`├ ${key} : ${content}`)
+        });
+    })
+    console.log(`${message.join("\n")}${color.Reset}`);
 }
 export function Log(text: string, add?: object) {
     CallLog(0, text, add);
