@@ -32,6 +32,7 @@ app.use("/assets", express.static(path.join(__dirname, "assets")))
 app.use("/favicon.ico", express.static(path.join(__dirname, "assets/images/favicon.ico")))
 app.use("/g", require("@router/game"))
 app.use("/account", require("@router/auth"))
+app.use("/hacking", require("@router/hacking"))
 
 app.get("/", async (req, res) => {
     const sess = req.session
@@ -77,6 +78,6 @@ io.on("connection", async (defsocket) => {
     else if (roomId) {
         if (!(typeof roomId == "string")) return
         socket.join(roomId)
-        gameSocket(io, socket, userId, roomId)
+        gameSocket(io, socket, roomId)
     }
 })

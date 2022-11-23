@@ -50,7 +50,7 @@ const socket = io.connect(`http://localhost`, {query: {session: $data.sessionId}
 })
 socket.on("profile", async e => {
     $data.profile = JSON.parse(e)
-    console.log($data.profile)
+    // console.log($data.profile)
     renderProfile()
 })
 socket.on("getShop", async e => {
@@ -237,20 +237,19 @@ async function renderProfile() {
     elements.dialog.profile.charactor.nickname.value = $data.profile.nick
     //* inventory
     elements.dialog.profile.inventory.innerHTML = ""
-    for (const category in $data.profile.item) {
-        for (const id in $data.profile.item[category]) {
-            const item  = $data.profile.item[category][id]
+    Object.entries($data.profile.item).forEach(([_, item]) => {
+        Object.entries(item).forEach(([id, num]) => {
             elements.dialog.profile.inventory.innerHTML += `<dama-item data-invId="${id}" onclick="equipItem('${id}')">
                 <img src="/ziu/${id}"/>
-                <span>${item.num}</span>
+                <span>${num}</span>
             </dama-item>`
-        }
-    }
-    for (const category in $data.profile.equip) {
-        const id = $data.profile.equip[category]
-        if (id === "") continue
-        console.log($data.profile.item[category])
-        if ($data.profile.item[category][id]) {
+        })
+    })
+    Object.entries($data.profile.equip).forEach(([category, id]) => {
+        if (id === "") return
+        // console.log($data.profile.equip)
+        // console.log($data.profile.item[category], id)
+        if ($data.profile.item[category].hasOwnProperty(id)) {
             const item = document.querySelector(`[data-invId="${id}"]`)
             item.setAttribute("class", "eqiupedItem")
             item.setAttribute("onclick", `unEquipItem('${category}')`)
@@ -262,5 +261,5 @@ async function renderProfile() {
                 <span>0</span>
             </dama-item>`
         }
-    }
+    })
 }

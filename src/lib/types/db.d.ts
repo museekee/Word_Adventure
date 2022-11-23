@@ -49,9 +49,7 @@ declare namespace DB {
     }
     interface UserItem {
         [x: string]: { // category_id
-            [x: string]: { // item_id
-                num: number; // 개수
-            }
+            [x: string]: number; // item_id: 개수
         };
     }
     interface UserEquip {

@@ -160,10 +160,8 @@ export async function buyItem(itemId: string, userId: string) {
     const item = await getShopItemById(itemId)
     const user_inv: DB.UserItem = JSON.parse((await getUserById(userId)).ITEM)
     if (!user_inv[item.CATEGORY]) user_inv[item.CATEGORY] = {} // 카테고리도 없는 쌩 초보 계정일 때
-    if (!user_inv[item.CATEGORY][itemId]) user_inv[item.CATEGORY][itemId] = {
-        num: 0
-    } // 카테고리는 있으나, 이 아이템은 처음 구매할 때
-    user_inv[item.CATEGORY][itemId].num++
+    if (!user_inv[item.CATEGORY][itemId]) user_inv[item.CATEGORY][itemId] = 0 // 카테고리는 있으나, 이 아이템은 처음 구매할 때
+    user_inv[item.CATEGORY][itemId]++
     await conn.query(`UPDATE users
     SET
         MONEY = MONEY + ${conn.escape(-item.PRICE)},
@@ -186,7 +184,7 @@ export async function equipItem(itemId: string, userId: string): Promise<"Using"
             if (value === itemId) return "Using"
         }
         // ^ 사용중(같은 것을 이미 착용 중)
-        if (userItem[item.CATEGORY][itemId].num <= 0) return "Shortage"
+        if (userItem[item.CATEGORY][itemId] <= 0) return "Shortage"
         // ^ 어떤 이유에서인지 아이템을 0개 갖고있을 때
         if (equip[item.CATEGORY])
             await unEquipItem(item.CATEGORY, userId, true)
@@ -198,7 +196,7 @@ export async function equipItem(itemId: string, userId: string): Promise<"Using"
     const user = await getUserById(userId)
     const userItem: DB.UserItem = JSON.parse(user.ITEM)
     const equip: DB.UserEquip = JSON.parse(user.EQUIP)
-    userItem[item.CATEGORY][itemId].num--
+    userItem[item.CATEGORY][itemId]--
     // ^ 장착하고 싶은 아이템 뺏기(-1)
     equip[item.CATEGORY] = itemId
     // ^ 아이템 장착시키기
@@ -215,7 +213,7 @@ export async function unEquipItem(category: string, userId: string, quetly?: boo
     const user = await getUserById(userId)
     const equip: DB.UserEquip = JSON.parse(user.EQUIP)
     const item: DB.UserItem = JSON.parse(user.ITEM)
-    item[category][equip[category]].num++
+    item[category][equip[category]]++
     // ^ 다시 돌려주기(+1)
     equip[category] = ""
     // ^ 돌려줬으니 없애기

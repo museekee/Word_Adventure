@@ -2,9 +2,8 @@ import { SessionSocket } from "@lib/types/app"
 import * as DB from "@lib/db"
 import SocketIO from "socket.io"
 
-export default async (io: SocketIO.Server, socket: SessionSocket, userId: string, roomId: string) => {
+export default async (io: SocketIO.Server, socket: SessionSocket, roomId: string) => {
     const room = await DB.getRoomById(roomId)
-    console.log(room)
     const categories: string[] = JSON.parse(room.CATEGORIES)
     
     await send("init", {
@@ -15,7 +14,6 @@ export default async (io: SocketIO.Server, socket: SessionSocket, userId: string
     async function newRound() {
         room.NOW_CATEGORY = categories[Math.floor(Math.random()*categories.length)]
         room.ANSWER = await DB.getRandomWordByCategory(room.NOW_CATEGORY)
-        console.log("dd", room)
         await DB.updateRoomByNewRound(room.ID, room.NOW_CATEGORY, room.ANSWER)
         await send("newRound", {
             question: cho_hangul(room.ANSWER),
