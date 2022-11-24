@@ -38,6 +38,7 @@ declare namespace DB {
         MONEY: number;
         ITEM: string;
         EQUIP: string;
+        BAN: number;
     }
     interface Shop extends RowDataPacket {
         ID: string;

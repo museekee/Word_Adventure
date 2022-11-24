@@ -23,6 +23,7 @@ body
                 th 아이템
                 th 착용
                 th 게임 시작일
+                th 밴
                 tr
                     td
                         input#userData_ID(size="7")
@@ -37,4 +38,19 @@ body
                     td
                         input#userData_Equip(size="30")
                     td#userData_CreatedAt
+                    td
+                        input#userData_Ban(type="checkbox")
             button(onclick="applyUser()") 적용
+        .row
+            h2 단어 해킹
+            h3 불러오기
+            div
+                | 단어 주제 / 시작점 / 개수 : 
+                span.inpbtn
+                    select#wordLoadCategorySelector
+                        - for (const category of categories)
+                            option(value=category.ID)=category.NAME
+                    input#wordLoadStart(type="number" value="1")
+                    input#wordLoadLimit(type="number" value="10")
+                    button(onclick="searchWord()") 검색
+            h3 추가하기

@@ -54,10 +54,14 @@ export default async (io: SocketIO.Server, socket: SessionSocket, roomId: string
     socket.on("timeout", async () => {
         await finish()
     })
+    socket.on("disconnect", async (reason) => {
+        await DB.deleteRoomById(room.ID)
+    })
     async function finish() {
         await DB.setUserExpAndMoney(room.PLAYER, room.EXP, room.MONEY)
         room.CATEGORIES = JSON.stringify(await DB.getCategoriesNameByCategoriesId(JSON.parse(room.CATEGORIES)))
         await send("finish", room)
+        await DB.deleteRoomById(room.ID)
     }
     async function send(type: string, data?: any) {
         const accuracy = ((room.NOW_ROUND - 1) / (room.WRONG + room.ROUND))

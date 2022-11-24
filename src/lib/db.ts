@@ -28,7 +28,7 @@ export async function getCategories() {
     conn.release()
     return rows
 }
-export async function generateRoom(id: string, categories: string[], player: string, round: number, time: number) {
+export async function generateRoom(rid: string, categories: string[], player: string, round: number, time: number) {
     const conn = await pool.getConnection()
     await conn.query(`INSERT INTO games (
         ID,
@@ -40,7 +40,7 @@ export async function generateRoom(id: string, categories: string[], player: str
     )
     VALUES
     (
-        ${conn.escape(id)},
+        ${conn.escape(rid)},
         ${conn.escape(JSON.stringify(categories))},
         ${conn.escape(player)},
         ${conn.escape(time)},
@@ -48,6 +48,13 @@ export async function generateRoom(id: string, categories: string[], player: str
         ${conn.escape(round)}
     );`)
     conn.release()
+}
+export async function isExistRoom(rid: string) {
+    const conn = await pool.getConnection()
+    const [rows]: [DB.Room[], FieldPacket[]] = await conn.query(`SELECT * FROM games WHERE ID = ${conn.escape(rid)}`)
+    conn.release()
+    if (rows.length === 0) return false
+    return true
 }
 export async function updateRoomByNewRound(rid: string, nowCategory: string, nowAnswer: string) {
     const conn = await pool.getConnection()
@@ -74,17 +81,28 @@ export async function updateRoomByRoomData(roomData: DB.Room) {
         ID = ${conn.escape(roomData.ID)}`)
     conn.release()
 }
-export async function getRoomById(id: string) {
+export async function getRoomById(rid: string) {
     const conn = await pool.getConnection()
-    const [rows]: [DB.Room[], FieldPacket[]] = await conn.query(`SELECT * FROM games WHERE ID = ${conn.escape(id)} LIMIT 1;`)
+    const [rows]: [DB.Room[], FieldPacket[]] = await conn.query(`SELECT * FROM games WHERE ID = ${conn.escape(rid)} LIMIT 1;`)
     conn.release()
     return rows[0]
+}
+export async function deleteRoomById(rid: string) {
+    const conn = await pool.getConnection()
+    await conn.query(`DELETE FROM games WHERE ID = ${conn.escape(rid)};`)
+    conn.release()
 }
 export async function getRandomWordByCategory(category: string) {
     const conn = await pool.getConnection()
     const [rows]: [DB.Word[], FieldPacket[]] = await conn.query(`SELECT WORD FROM words WHERE CATEGORY = ${conn.escape(category)} ORDER BY RAND() LIMIT 1;`)
     conn.release()
     return rows[0].WORD
+}
+export async function getWordsByCategoryId(category: string, start: number, limit: number) {
+    const conn = await pool.getConnection()
+    const [rows]: [DB.Word[], FieldPacket[]] = await conn.query(`SELECT WORD FROM words WHERE CATEGORY = ${conn.escape(category)} LIMIT ${conn.escape(start - 1)}, ${conn.escape(limit)};`)
+    conn.release()
+    return rows
 }
 export async function getCategoryNameByCategoryId(category: string) {
     const conn = await pool.getConnection()
@@ -134,6 +152,20 @@ export async function setUserExpAndMoney(id: string, exp: number, money: number)
         EXP = EXP + ${conn.escape(exp)},
         MONEY = MONEY + ${conn.escape(money)}
     WHERE ID = ${conn.escape(id)};`)
+    conn.release()
+}
+export async function updateUser(originalId: string, id: string, nick: string, exp: string, money: string, item: string, equip: string, ban: boolean) {
+    const conn = await pool.getConnection()
+    await conn.query(`UPDATE users
+    SET 
+        ID = ${conn.escape(id)},
+        NICK = ${conn.escape(nick)},
+        EXP = ${conn.escape(exp)},
+        MONEY = ${conn.escape(money)},
+        ITEM = ${conn.escape(item)},
+        EQUIP = ${conn.escape(equip)},
+        BAN = ${conn.escape(ban ? 1 : 0)}
+    WHERE ID = ${conn.escape(originalId)};`)
     conn.release()
 }
 export async function getShopItemsByCategory(category: string) {

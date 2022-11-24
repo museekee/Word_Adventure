@@ -3,43 +3,101 @@ const elems = {
     userNameTbox: document.getElementById("userNameTbox"),
     userData: {
         main: document.getElementById("userData"),
-        userDataID: document.getElementById("userData_ID"),
-        userDataNICK: document.getElementById("userData_Nick"),
-        userDataEXP: document.getElementById("userData_EXP"),
-        userDataMONEY: document.getElementById("userData_Money"),
-        userDataITEM: document.getElementById("userData_Item"),
-        userDataEQUIP: document.getElementById("userData_Equip"),
-        userDataCREATED_AT: document.getElementById("userData_CreatedAt")
+        ID: document.getElementById("userData_ID"),
+        NICK: document.getElementById("userData_Nick"),
+        EXP: document.getElementById("userData_EXP"),
+        MONEY: document.getElementById("userData_Money"),
+        ITEM: document.getElementById("userData_Item"),
+        EQUIP: document.getElementById("userData_Equip"),
+        CREATED_AT: document.getElementById("userData_CreatedAt"),
+        BAN: document.getElementById("userData_Ban")
+    },
+    wordLoad: {
+        categorySelector: document.getElementById("wordLoadCategorySelector"),
+        start: document.getElementById("wordLoadStart"),
+        limit: document.getElementById("wordLoadLimit")
     }
 }
 async function searchUser() {
-    const res = await fetch(`${window.location.pathname}/user/${elems.userNameTbox.value}`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            key: passwordTbox.value
+    const data = await (new request(`user/${elems.userNameTbox.value}`).post())
+    if (data) {
+        Object.entries(data).forEach(([key, value]) => {
+            elems.userData[key].value = value
         })
-    })
-    switch (res.status) {
-        case 200: {
-            const data = await res.json()
-            Object.entries(data).forEach(([key, value]) => {
-                elems.userData[`userData${key}`].value = value
-            })
-            elems.userData.userDataCREATED_AT.innerText = data.CREATED_AT
-            break
-        }
-        default:
-            return await swal.fire({
-                title: "오류!",
-                text: `${res.status} ${res.statusText}`,
-                icon: "error",
-                confirmButtonText: '확인'
-            })
+        elems.userData.BAN.checked = data.BAN == 0 ? false : true
+        elems.userData.CREATED_AT.innerText = data.CREATED_AT
     }
 }
 async function applyUser() {
-    
+    const data = await (new request(`user/${elems.userNameTbox.value}/apply`).post({
+        id: elems.userData.ID.value,
+        nick: elems.userData.NICK.value,
+        exp: elems.userData.EXP.value,
+        money: elems.userData.MONEY.value,
+        item: elems.userData.ITEM.value,
+        equip: elems.userData.EQUIP.value,
+        ban: elems.userData.BAN.checked
+    }))
+    if (data) {
+        return await swal.fire({
+            title: "성공!",
+            text: `유저를 성공적으로 업데이트 하였습니다!`,
+            icon: "success",
+            confirmButtonText: '확인'
+        })
+    }
+}
+
+async function searchWord() {
+    const res = await (new request("word").post({
+        category: elems.wordLoad.categorySelector.value,
+        start: Number(elems.wordLoad.start.value),
+        limit: Number(elems.wordLoad.limit.value)
+    }))
+    console.log(res)
+}
+
+class request {
+    constructor (url) {
+        this.url = url
+    }
+    async get(data) {
+        const res = await fetch(`${window.location.pathname}/${this.url}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                key: elems.passwordTbox.value,
+                data
+            })
+        })
+        if (res.status !== 200) await swal.fire({
+            title: "오류!",
+            text: `${res.status} ${res.statusText}`,
+            icon: "error",
+            confirmButtonText: '확인'
+        })
+        else return await res.json()
+    }
+    async post(data) {
+        console.log(data)
+        const res = await fetch(`${window.location.pathname}/${this.url}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                key: elems.passwordTbox.value,
+                data
+            })
+        })
+        if (res.status !== 200) await swal.fire({
+            title: "오류!",
+            text: `${res.status} ${res.statusText}`,
+            icon: "error",
+            confirmButtonText: '확인'
+        })
+        else return await res.json()
+    }
 }

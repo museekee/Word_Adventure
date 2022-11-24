@@ -1,4 +1,4 @@
-import express from "express"
+import express, { response } from "express"
 import config from "@lib/config.json"
 import path from "path"
 import * as NLog from "@lib/NyLog"
@@ -20,11 +20,14 @@ const mySession = session({
     store: sessionStore
 })
 app.use(mySession)
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
     const sess: Auth.Session = req.session
     res.locals.session = sess
+    if (sess.user && !!(await DB.getUserById(sess.user.id)).BAN) return res.send("게임에서 영구 추방 되었습니다.")
+    // ^ 영구밴
     next()
 })
+app.set("etag", false);
 app.set("view engine", "pug")
 app.set("views",  path.join(__dirname, "views"))
 app.use(express.json())
@@ -77,6 +80,7 @@ io.on("connection", async (defsocket) => {
         appSocket(socket, userId)
     else if (roomId) {
         if (!(typeof roomId == "string")) return
+        if (!await DB.isExistRoom(roomId)) return
         socket.join(roomId)
         gameSocket(io, socket, roomId)
     }

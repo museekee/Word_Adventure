@@ -95,7 +95,10 @@ socket.on("correct", async e => {
         Elements.Word.style.color = "#ffffff"
         Elements.Word.innerText = data.answer
         clearInterval($data.timer)
+        Elements.WordWrite.setAttribute("disabled", "")
         await sleep(1000)
+        Elements.WordWrite.removeAttribute("disabled")
+        Elements.WordWrite.focus()
         $data.timer = setInterval(timerCb, $data.TICK)
         send("newRound")
     }
@@ -103,7 +106,10 @@ socket.on("correct", async e => {
         Elements.Word.style.color = "#ff0000"
         Elements.Word.innerText = data.answer
         clearInterval($data.timer)
+        Elements.WordWrite.setAttribute("disabled", "")
         await sleep(1000)
+        Elements.WordWrite.removeAttribute("disabled")
+        Elements.WordWrite.focus()
         $data.timer = setInterval(timerCb, $data.TICK)
         Elements.Word.style.color = "#ffffff"
         Elements.Word.innerText = $data.room.question
