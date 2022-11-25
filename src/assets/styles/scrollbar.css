@@ -10,3 +10,6 @@
   border-radius: 10px;
   background-color: #c2c2c2;
 }
+td::-webkit-scrollbar {
+  height: 4px;
+}

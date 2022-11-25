@@ -41,13 +41,15 @@ const $data = {
         }
     },
     TICK: 10,
+    oldTick: new Date().getTime(),
     timer: undefined
 }
 const socket = io.connect(`${$data.wsUrl}`, {query: {session: $data.sessionId, roomId: $data.roomId}})
 
 async function timerCb() {
-    $data.room.time.nowAllTime -= $data.TICK;
-    $data.room.time.nowRoundTime -= $data.TICK;
+    const nowTime = new Date().getTime()
+    $data.room.time.nowAllTime -= nowTime - $data.oldTick;
+    $data.room.time.nowRoundTime -= nowTime - $data.oldTick;
     if ($data.room.time.nowRoundTime <= 0) {
         await send("timeout")
         clearInterval($data.timer)
@@ -56,6 +58,7 @@ async function timerCb() {
     Elements.AllTimeValue.style.height = `${$data.room.time.nowAllTime / $data.room.time.allTime * 100}%`
     Elements.RoundTimeValue.innerText = Math.round($data.room.time.nowRoundTime*0.001)
     Elements.RoundTimeValue.style.height = `${$data.room.time.nowRoundTime / $data.room.time.roundTime * 100}%`
+    $data.oldTick = nowTime
 }
 socket.on("init", async e => {
     const data = JSON.parse(e)

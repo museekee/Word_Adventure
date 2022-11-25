@@ -53,4 +53,8 @@ router.post("/word/apply", async (req, res) => {
     await DB.setWordsByCategoryId(category, words)
     return res.send({code: 200})
 })
+
+router.post("/room", async (req, res) => {
+    return res.send(await DB.getRooms())
+})
 export = router

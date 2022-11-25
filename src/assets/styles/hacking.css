@@ -83,3 +83,12 @@ word-item {
     justify-content: center;
     font-weight: bold;
 }
+#roomList {
+    width: auto;
+    word-break: break-all;
+    white-space: nowrap;
+}
+#roomList td:nth-child(2) {
+    max-width: 1000px;
+    overflow-x: auto;
+}

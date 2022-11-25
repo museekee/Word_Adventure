@@ -81,6 +81,12 @@ export async function updateRoomByRoomData(roomData: DB.Room) {
         ID = ${conn.escape(roomData.ID)}`)
     conn.release()
 }
+export async function getRooms() {
+    const conn = await pool.getConnection()
+    const [rows]: [DB.Room[], FieldPacket[]] = await conn.query("SELECT * FROM games")
+    conn.release()
+    return rows
+}
 export async function getRoomById(rid: string) {
     const conn = await pool.getConnection()
     const [rows]: [DB.Room[], FieldPacket[]] = await conn.query(`SELECT * FROM games WHERE ID = ${conn.escape(rid)} LIMIT 1;`)

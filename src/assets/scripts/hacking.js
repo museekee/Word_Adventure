@@ -99,6 +99,12 @@ async function applyWord() {
         words: words
     }))
 }
+
+async function loadRooms() {
+    const res = await (new request("room").post())
+    console.log(res)
+}
+
 class request {
     constructor (url) {
         this.url = url
@@ -123,7 +129,10 @@ class request {
         else return await res.json()
     }
     async post(data) {
-        console.log(data)
+        console.log(JSON.stringify({
+            key: ELEMENTS.passwordTbox.value,
+            data: data ? data : undefined
+        }))
         const res = await fetch(`${window.location.pathname}/${this.url}`, {
             method: "POST",
             headers: {
@@ -131,7 +140,7 @@ class request {
             },
             body: JSON.stringify({
                 key: ELEMENTS.passwordTbox.value,
-                data
+                data: data ? data : undefined
             })
         })
         if (res.status !== 200) await swal.fire({
