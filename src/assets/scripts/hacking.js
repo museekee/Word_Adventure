@@ -1,4 +1,4 @@
-const elems = {
+const ELEMENTS = {
     passwordTbox: document.getElementById("passwordTbox"),
     userNameTbox: document.getElementById("userNameTbox"),
     userData: {
@@ -20,24 +20,24 @@ const elems = {
     }
 }
 async function searchUser() {
-    const data = await (new request(`user/${elems.userNameTbox.value}`).post())
+    const data = await (new request(`user/${ELEMENTS.userNameTbox.value}`).post())
     if (data) {
         Object.entries(data).forEach(([key, value]) => {
-            elems.userData[key].value = value
+            ELEMENTS.userData[key].value = value
         })
-        elems.userData.BAN.checked = data.BAN == 0 ? false : true
-        elems.userData.CREATED_AT.innerText = data.CREATED_AT
+        ELEMENTS.userData.BAN.checked = data.BAN == 0 ? false : true
+        ELEMENTS.userData.CREATED_AT.innerText = data.CREATED_AT
     }
 }
 async function applyUser() {
-    const data = await (new request(`user/${elems.userNameTbox.value}/apply`).post({
-        id: elems.userData.ID.value,
-        nick: elems.userData.NICK.value,
-        exp: elems.userData.EXP.value,
-        money: elems.userData.MONEY.value,
-        item: elems.userData.ITEM.value,
-        equip: elems.userData.EQUIP.value,
-        ban: elems.userData.BAN.checked
+    const data = await (new request(`user/${ELEMENTS.userNameTbox.value}/apply`).post({
+        id: ELEMENTS.userData.ID.value,
+        nick: ELEMENTS.userData.NICK.value,
+        exp: ELEMENTS.userData.EXP.value,
+        money: ELEMENTS.userData.MONEY.value,
+        item: ELEMENTS.userData.ITEM.value,
+        equip: ELEMENTS.userData.EQUIP.value,
+        ban: ELEMENTS.userData.BAN.checked
     }))
     if (data) {
         return await swal.fire({
@@ -51,11 +51,11 @@ async function applyUser() {
 
 async function searchWord() {
     const res = await (new request("word").post({
-        category: elems.wordLoad.categorySelector.value,
-        start: Number(elems.wordLoad.start.value),
-        limit: Number(elems.wordLoad.limit.value)
+        category: ELEMENTS.wordLoad.categorySelector.value,
+        start: Number(ELEMENTS.wordLoad.start.value),
+        limit: Number(ELEMENTS.wordLoad.limit.value)
     }))
-    elems.wordLoad.list.innerHTML = ""
+    ELEMENTS.wordLoad.list.innerHTML = ""
     res.forEach(i => {
         const v = i["WORD"]
         const wordItem = document.createElement("word-item")
@@ -68,7 +68,7 @@ async function searchWord() {
         button.setAttribute("onclick", "deleteWord(this)")
         wordItem.appendChild(input)
         wordItem.appendChild(button)
-        elems.wordLoad.list.appendChild(wordItem)
+        ELEMENTS.wordLoad.list.appendChild(wordItem)
     })
 }
 /**
@@ -77,7 +77,28 @@ async function searchWord() {
 async function deleteWord(elem) {
     elem.parentElement.remove()
 }
-
+async function addWord() {
+    const wordItem = document.createElement("word-item")
+    wordItem.setAttribute("class", "inpbtn")
+    const input = document.createElement("input")
+    input.setAttribute("class", "wordValue")
+    const button = document.createElement("button")
+    button.setAttribute("class", "wordDelete")
+    button.setAttribute("onclick", "deleteWord(this)")
+    wordItem.appendChild(input)
+    wordItem.appendChild(button)
+    ELEMENTS.wordLoad.list.appendChild(wordItem)
+}
+async function applyWord() {
+    const words = []
+    ELEMENTS.wordLoad.list.childNodes.forEach(wordItem => {
+        words.push(wordItem.childNodes[0].value)
+    })
+    await (new request("word/apply").post({
+        category: ELEMENTS.wordLoad.categorySelector.value,
+        words: words
+    }))
+}
 class request {
     constructor (url) {
         this.url = url
@@ -89,7 +110,7 @@ class request {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                key: elems.passwordTbox.value,
+                key: ELEMENTS.passwordTbox.value,
                 data
             })
         })
@@ -109,7 +130,7 @@ class request {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                key: elems.passwordTbox.value,
+                key: ELEMENTS.passwordTbox.value,
                 data
             })
         })

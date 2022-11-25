@@ -40,12 +40,17 @@ router.post("/user/:id", async (req, res) => {
 router.post("/user/:id/apply", async (req, res) => {
     const { id, nick, exp, money, item, equip, ban } = req.body.data
     await DB.updateUser(req.params.id, id, nick, exp, money, item, equip, ban)
-    return res.send({foo: "bar"})
+    return res.send({code: 200})
 })
 
 router.post("/word", async (req, res) => {
     const { category, start, limit }: {category: string, start: number, limit: number} = req.body.data
     if (start <= 0 || limit <= 0) return res.sendStatus(403)
     return res.send(await DB.getWordsByCategoryId(category, start, limit))
+})
+router.post("/word/apply", async (req, res) => {
+    const { category, words }: {category: string, words: string[]} = req.body.data
+    await DB.setWordsByCategoryId(category, words)
+    return res.send({code: 200})
 })
 export = router

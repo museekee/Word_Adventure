@@ -73,3 +73,13 @@ word-item {
         width: 40px;
         background-color: #ff0000;
     }
+#addWordBtn {
+    width: 100%;
+    height: 50px;
+    background: #00ff00;
+    font-size: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}

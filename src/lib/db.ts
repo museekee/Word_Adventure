@@ -98,9 +98,26 @@ export async function getRandomWordByCategory(category: string) {
     conn.release()
     return rows[0].WORD
 }
+export async function setWordsByCategoryId(category: string, words: string[]) {
+    const wordss: string[][] = []
+    words.forEach(v => {
+        wordss.push([v, category])
+    })
+    const conn = await pool.getConnection()
+    await conn.query(`DELETE FROM words WHERE CATEGORY = ${conn.escape(category)}`)
+    conn.release()
+    if (words.length === 0) return
+    await conn.query(`INSERT INTO words (
+        WORD,
+        CATEGORY
+    )
+    VALUES
+    ?`, [wordss])
+    conn.release()
+}
 export async function getWordsByCategoryId(category: string, start: number, limit: number) {
     const conn = await pool.getConnection()
-    const [rows]: [DB.Word[], FieldPacket[]] = await conn.query(`SELECT WORD FROM words WHERE CATEGORY = ${conn.escape(category)} LIMIT ${conn.escape(start - 1)}, ${conn.escape(limit)};`)
+    const [rows]: [DB.Word[], FieldPacket[]] = await conn.query(`SELECT WORD FROM words WHERE CATEGORY = ${conn.escape(category)};`)
     conn.release()
     return rows
 }
