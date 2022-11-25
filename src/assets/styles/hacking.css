@@ -57,3 +57,19 @@ table, td, th {
     margin-left: -2px;
     width: 75px;
 }
+#wordLoadList {
+    max-height: 800px;
+    overflow-y: auto;
+}
+word-item {
+    display: flex !important;
+    width: 250px;
+    margin-top: 10px;
+}
+    word-item > .wordValue {
+        width: 210px;
+    }
+    .wordDelete {
+        width: 40px;
+        background-color: #ff0000;
+    }

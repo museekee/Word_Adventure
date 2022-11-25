@@ -15,7 +15,8 @@ const elems = {
     wordLoad: {
         categorySelector: document.getElementById("wordLoadCategorySelector"),
         start: document.getElementById("wordLoadStart"),
-        limit: document.getElementById("wordLoadLimit")
+        limit: document.getElementById("wordLoadLimit"),
+        list: document.getElementById("wordLoadList")
     }
 }
 async function searchUser() {
@@ -54,7 +55,27 @@ async function searchWord() {
         start: Number(elems.wordLoad.start.value),
         limit: Number(elems.wordLoad.limit.value)
     }))
-    console.log(res)
+    elems.wordLoad.list.innerHTML = ""
+    res.forEach(i => {
+        const v = i["WORD"]
+        const wordItem = document.createElement("word-item")
+        wordItem.setAttribute("class", "inpbtn")
+        const input = document.createElement("input")
+        input.value = v
+        input.setAttribute("class", "wordValue")
+        const button = document.createElement("button")
+        button.setAttribute("class", "wordDelete")
+        button.setAttribute("onclick", "deleteWord(this)")
+        wordItem.appendChild(input)
+        wordItem.appendChild(button)
+        elems.wordLoad.list.appendChild(wordItem)
+    })
+}
+/**
+ * @param {HTMLElement} elem 
+ */
+async function deleteWord(elem) {
+    elem.parentElement.remove()
 }
 
 class request {
