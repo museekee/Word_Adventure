@@ -23,11 +23,18 @@ router.use((req, res, next) => {
 router.get("/:roomId", async (req, res) => {
     const room = await DB.getRoomById(req.params.roomId)
     if (!room) return res.sendStatus(404)
-    if (!req.session.user) return res.sendStatus(403)
+    if (!(req.session?.user?.id === room.PLAYER)) return res.sendStatus(403)
     return res.render("game", {
-        ws: `ws://${req.get("host")}`,
-        sessionId: req.session.id,
-        roomId: req.params.roomId
+        ws: `ws://${req.get("host")}?session=${req.session.id}&roomId=${req.params.roomId}`
+    })
+})
+router.get("/:roomId/observe", async (req, res) => {
+    const room = await DB.getRoomById(req.params.roomId)
+    if (!room) return res.sendStatus(404)
+    if (!req.session.user) return res.sendStatus(403)
+    if (!config.ADMINS.includes(req.session.user.id)) return res.sendStatus(403)
+    return res.render("game", {
+        ws: `ws://${req.get("host")}?session=${req.session.id}&roomId=${req.params.roomId}&observe=true`
     })
 })
 export = router

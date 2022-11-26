@@ -17,6 +17,9 @@ const ELEMENTS = {
         start: document.getElementById("wordLoadStart"),
         limit: document.getElementById("wordLoadLimit"),
         list: document.getElementById("wordLoadList")
+    },
+    roomList: {
+        list: document.getElementById("roomList")
     }
 }
 async function searchUser() {
@@ -101,8 +104,28 @@ async function applyWord() {
 }
 
 async function loadRooms() {
+    /**
+     * @type {HTMLTableElement}
+    **/
+    const table = ELEMENTS.roomList.list
+    Array(2).fill().forEach(()=>table.childNodes[0].childNodes.forEach((tr, i) => {
+        console.log(tr.childNodes[0].nodeName)
+        if (tr.childNodes[0].nodeName !== "TH") table.deleteRow(i)
+    }))
     const res = await (new request("room").post())
-    console.log(res)
+    res.forEach(item => {
+        /**
+         * @type {HTMLTableRowElement}
+        **/
+        const newRow = table.insertRow()
+        
+        newRow.insertCell(0).innerText = item.ID
+        newRow.insertCell(1).innerText = JSON.parse(item.CATEGORIES).join(" / ")
+        newRow.insertCell(2).innerText = item.PLAYER
+        newRow.insertCell(3).innerText = `${item.NOW_ROUND} / ${item.ROUND}`
+        newRow.insertCell(4).innerText = item.MONEY
+        newRow.insertCell(5).innerHTML = `<a href="/g/${item.ID}/observe">관전</a>`
+    })
 }
 
 class request {

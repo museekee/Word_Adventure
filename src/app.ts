@@ -70,7 +70,8 @@ io.on("connection", async (defsocket) => {
     NLog.Log("Connect lobby server", { ip: ip })
     const sessionId = socket.handshake.query.session
     const roomId = socket.handshake.query.roomId
-    if (!(typeof sessionId == "string")) return
+    const observe = socket.handshake.query.observe
+    if (!(typeof sessionId === "string")) return
     const existSid = await DB.isExistSession(sessionId)
     if (!existSid) return
     const sess = await DB.getSessionDataBySessionId(sessionId)
@@ -79,9 +80,17 @@ io.on("connection", async (defsocket) => {
     if (!roomId)
         appSocket(socket, userId)
     else if (roomId) {
-        if (!(typeof roomId == "string")) return
+        if (!(typeof roomId === "string")) return
         if (!await DB.isExistRoom(roomId)) return
-        socket.join(roomId)
-        gameSocket(io, socket, roomId)
+        if (!observe && !((await DB.getRoomById(roomId)).PLAYER === sess.user.id)) return
+        else if (observe === "true") {
+            socket.join(roomId)
+            gameSocket(io, socket, roomId, "observer")
+        }
+        else if (!observe) {
+            socket.join(roomId)
+            gameSocket(io, socket, roomId, "player")
+        }
+        else return
     }
 })

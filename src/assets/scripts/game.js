@@ -21,8 +21,6 @@ const Elements = {
     }
 }
 const $data = {
-    sessionId: document.getElementById("sessionId").innerText,
-    roomId: document.getElementById("roomId").innerText,
     wsUrl: `${document.getElementById("ws").innerText}`,
     room: {
         nowRound: undefined,
@@ -44,7 +42,7 @@ const $data = {
     oldTick: new Date().getTime(),
     timer: undefined
 }
-const socket = io.connect(`${$data.wsUrl}`, {query: {session: $data.sessionId, roomId: $data.roomId}})
+const socket = io.connect(`${$data.wsUrl}`)
 
 async function timerCb() {
     const nowTime = new Date().getTime()
@@ -122,6 +120,15 @@ socket.on("finish", async e => {
     const data = JSON.parse(e)
     clearInterval($data.timer)
     renderFinishByData(data)
+})
+
+// * observer
+socket.on("observe", async e => {
+    const data = JSON.parse(e)
+    swal.fire({
+        title: "옵저버",
+        text: data.value
+    })
 })
 
 function renderDetail() {

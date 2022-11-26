@@ -2,7 +2,7 @@ import { SessionSocket } from "@lib/types/app"
 import * as DB from "@lib/db"
 import SocketIO from "socket.io"
 
-export default async (io: SocketIO.Server, socket: SessionSocket, roomId: string) => {
+export default async (io: SocketIO.Server, socket: SessionSocket, roomId: string, userType: "player" | "observer") => {
     const room = await DB.getRoomById(roomId)
     const categories: string[] = JSON.parse(room.CATEGORIES)
     
@@ -12,6 +12,10 @@ export default async (io: SocketIO.Server, socket: SessionSocket, roomId: string
         nowRound: room.NOW_ROUND
     })
     async function newRound() {
+        if (userType !== "player") return await send("newRound", {
+            question: cho_hangul(room.ANSWER),
+            nowCategory: room.NOW_CATEGORY
+        })
         room.NOW_CATEGORY = categories[Math.floor(Math.random()*categories.length)]
         room.ANSWER = await DB.getRandomWordByCategory(room.NOW_CATEGORY)
         await DB.updateRoomByNewRound(room.ID, room.NOW_CATEGORY, room.ANSWER)
@@ -33,6 +37,7 @@ export default async (io: SocketIO.Server, socket: SessionSocket, roomId: string
     await newRound()
     socket.on("newRound", newRound)
     socket.on("answer", async e => {
+        if (userType !== "player") return await send("observe", {value: "플레이어 외의 유저는 채팅을 칠 수 없습니다."})
         const data: {value: string, time: number} = JSON.parse(e)
         if (room.ANSWER === data.value) {
             room.NOW_TIME = data.time
@@ -52,18 +57,35 @@ export default async (io: SocketIO.Server, socket: SessionSocket, roomId: string
         await DB.updateRoomByRoomData(room)
     })
     socket.on("timeout", async () => {
+        if (userType !== "player")
         await finish()
     })
     socket.on("disconnect", async (reason) => {
+        if (userType !== "player") return
         await DB.deleteRoomById(room.ID)
     })
     async function finish() {
+        if (userType === "observer") return await send("finish", room)
         await DB.setUserExpAndMoney(room.PLAYER, room.EXP, room.MONEY)
         room.CATEGORIES = JSON.stringify(await DB.getCategoriesNameByCategoriesId(JSON.parse(room.CATEGORIES)))
         await send("finish", room)
         await DB.deleteRoomById(room.ID)
     }
     async function send(type: string, data?: any) {
+        if (userType !== "player") {
+            socket.emit("room", JSON.stringify({
+                category: room.NOW_CATEGORY ? await DB.getCategoryNameByCategoryId(room.NOW_CATEGORY) : null,
+                wrong: room.WRONG,
+                exp: room.EXP,
+                money: room.MONEY,
+                nowRound: room.NOW_ROUND,
+                maxRound: room.ROUND,
+                allTime: room.TIME,
+                nowAllTime: room.NOW_TIME
+            }))
+            socket.emit(type, JSON.stringify(data))
+            return
+        }
         const accuracy = ((room.NOW_ROUND - 1) / (room.WRONG + room.ROUND))
         console.log(Math.round((9160 * accuracy) / room.TIME * room.NOW_TIME))
         room.MONEY = Math.round((9160 * accuracy) / room.TIME * room.NOW_TIME)
