@@ -138,6 +138,7 @@ function renderDetail() {
     Elements.Exp.innerText = $data.room.exp
 }
 function renderFinishByData(data) {
+    clearInterval($data.timer)
     const ForP = $data.room.time.nowRoundTime <= 0 ? "fail" : "perfect"
     if (ForP === "fail") Elements.Result.ForP.style.width = "200px"
     else Elements.Result.ForP.style.width = "250px"

@@ -23,37 +23,32 @@ export default async (io: SocketIO.Server, socket: SessionSocket, roomId: string
             question: cho_hangul(room.ANSWER),
             nowCategory: room.NOW_CATEGORY
         })
-        function cho_hangul(str: string) {
-            const cho = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
-            let result = "";
-            for(let i=0; i<str.length; i++) {
-              const code = str.charCodeAt(i)-44032;
-              if(code>-1 && code<11172) result += cho[Math.floor(code/588)];
-              else result += str.charAt(i);
-            }
-            return result;
-        }
     }
     await newRound()
     socket.on("newRound", newRound)
     socket.on("answer", async e => {
         if (userType !== "player") return await send("observe", {value: "플레이어 외의 유저는 채팅을 칠 수 없습니다."})
         const data: {value: string, time: number} = JSON.parse(e)
-        if (room.ANSWER === data.value) {
-            room.NOW_TIME = data.time
-            if (room.NOW_ROUND === room.ROUND)
-                finish()
-            else {
-                room.EXP += (data.value.length * 5 + rand(0, 10))
-                room.NOW_ROUND++
-                await send("correct", {value: true, answer: data.value})
+        room.NOW_TIME = data.time
+        if (cho_hangul(room.ANSWER) === cho_hangul(data.value)) {
+            for (const item of await DB.getWordsByCategoryId(room.NOW_CATEGORY, 0, 1)) {
+                if (item.WORD === data.value) {
+                    if (room.NOW_ROUND === room.ROUND)
+                        return await finish()
+                    else {
+                        room.EXP += (data.value.length * 5 + rand(0, 10))
+                        room.NOW_ROUND++
+                        return await send("correct", {value: true, answer: data.value})
+                    }
+                }
             }
+            room.WRONG++
+            await send("correct", {value: false, answer: data.value})
         }
         else {
             room.WRONG++
             await send("correct", {value: false, answer: data.value})
         }
-        console.log(room.ANSWER)
         await DB.updateRoomByRoomData(room)
     })
     socket.on("timeout", async () => {
@@ -71,6 +66,16 @@ export default async (io: SocketIO.Server, socket: SessionSocket, roomId: string
         await send("finish", room)
         await DB.deleteRoomById(room.ID)
     }
+    function cho_hangul(str: string) {
+        const cho = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+        let result = "";
+        for(let i=0; i<str.length; i++) {
+          const code = str.charCodeAt(i)-44032;
+          if(code>-1 && code<11172) result += cho[Math.floor(code/588)];
+          else result += str.charAt(i);
+        }
+        return result;
+    }
     async function send(type: string, data?: any) {
         if (userType !== "player") {
             socket.emit("room", JSON.stringify({
@@ -87,10 +92,8 @@ export default async (io: SocketIO.Server, socket: SessionSocket, roomId: string
             return
         }
         const accuracy = ((room.NOW_ROUND - 1) / (room.WRONG + room.ROUND))
-        console.log(Math.round((9160 * accuracy) / room.TIME * room.NOW_TIME))
         room.MONEY = Math.round((9160 * accuracy) / room.TIME * room.NOW_TIME)
         await DB.updateRoomByRoomData(room)
-        console.log(room.NOW_CATEGORY)
         io.to(room.ID).emit("room", JSON.stringify({
             category: room.NOW_CATEGORY ? await DB.getCategoryNameByCategoryId(room.NOW_CATEGORY) : null,
             wrong: room.WRONG,
