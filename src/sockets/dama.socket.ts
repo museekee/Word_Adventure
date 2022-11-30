@@ -2,7 +2,7 @@ import { SessionSocket } from "@lib/types/app"
 import * as DB from "@lib/db"
 import SocketIO from "socket.io"
 
-export default async (io: SocketIO.Server, socket: SessionSocket, roomId: string, userType: "player" | "observer") => {
+export default async (io: SocketIO.Server, socket: SessionSocket, roomId: string, observe: boolean, quizType: "choQuiz" | "jungjongQuiz") => {
     const room = await DB.getRoomById(roomId)
     const categories: string[] = JSON.parse(room.CATEGORIES)
     
@@ -12,25 +12,25 @@ export default async (io: SocketIO.Server, socket: SessionSocket, roomId: string
         nowRound: room.NOW_ROUND
     })
     async function newRound() {
-        if (userType !== "player") return await send("newRound", {
-            question: cho_hangul(room.ANSWER),
+        if (observe) return await send("newRound", {
+            question: disassemble_hangul(room.ANSWER),
             nowCategory: room.NOW_CATEGORY
         })
         room.NOW_CATEGORY = categories[Math.floor(Math.random()*categories.length)]
         room.ANSWER = await DB.getRandomWordByCategory(room.NOW_CATEGORY)
         await DB.updateRoomByNewRound(room.ID, room.NOW_CATEGORY, room.ANSWER)
         await send("newRound", {
-            question: cho_hangul(room.ANSWER),
+            question: disassemble_hangul(room.ANSWER),
             nowCategory: room.NOW_CATEGORY
         })
     }
     await newRound()
     socket.on("newRound", newRound)
     socket.on("answer", async e => {
-        if (userType !== "player") return await send("observe", {value: "플레이어 외의 유저는 채팅을 칠 수 없습니다."})
+        if (observe) return await send("observe", {value: "플레이어 외의 유저는 채팅을 칠 수 없습니다."})
         const data: {value: string, time: number} = JSON.parse(e)
         room.NOW_TIME = data.time
-        if (cho_hangul(room.ANSWER) === cho_hangul(data.value)) {
+        if (disassemble_hangul(room.ANSWER) === disassemble_hangul(data.value)) {
             for (const item of await DB.getWordsByCategoryId(room.NOW_CATEGORY, 0, 1)) {
                 if (item.WORD === data.value) {
                     if (room.NOW_ROUND === room.ROUND)
@@ -52,32 +52,35 @@ export default async (io: SocketIO.Server, socket: SessionSocket, roomId: string
         await DB.updateRoomByRoomData(room)
     })
     socket.on("timeout", async () => {
-        if (userType !== "player")
+        if (observe) return
         await finish()
     })
     socket.on("disconnect", async (reason) => {
-        if (userType !== "player") return
+        if (observe) return
         await DB.deleteRoomById(room.ID)
     })
     async function finish() {
-        if (userType === "observer") return await send("finish", room)
+        if (!await DB.isExistRoom(room.ID)) return
+        if (observe) return await send("finish", room)
         await DB.setUserExpAndMoney(room.PLAYER, room.EXP, room.MONEY)
         room.CATEGORIES = JSON.stringify(await DB.getCategoriesNameByCategoriesId(JSON.parse(room.CATEGORIES)))
         await send("finish", room)
         await DB.deleteRoomById(room.ID)
     }
-    function cho_hangul(str: string) {
-        const cho = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
-        let result = "";
-        for(let i=0; i<str.length; i++) {
-          const code = str.charCodeAt(i)-44032;
-          if(code>-1 && code<11172) result += cho[Math.floor(code/588)];
-          else result += str.charAt(i);
+    function disassemble_hangul(str: string) {
+        const result = []
+        for (let i = 0; i < str.length; i++) {
+            const uni = str.charCodeAt(i) - 44032;
+            const cho = ((uni / 28) / 21) + 4352;
+            const jung = ((uni / 28) % 21) + 4449;
+            const jong = (uni % 28) + 4519;
+            if (quizType === "choQuiz") result.push(String.fromCharCode(cho))
+            else if (quizType === "jungjongQuiz") result.push(String.fromCharCode(4447) + String.fromCharCode(jung) + (jong !== 4519 ? String.fromCharCode(jong) : ""))
         }
-        return result;
+        return result.join("")
     }
     async function send(type: string, data?: any) {
-        if (userType !== "player") {
+        if (observe) {
             socket.emit("room", JSON.stringify({
                 category: room.NOW_CATEGORY ? await DB.getCategoryNameByCategoryId(room.NOW_CATEGORY) : null,
                 wrong: room.WRONG,

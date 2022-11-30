@@ -19,10 +19,12 @@ export default async (socket: SessionSocket, userId: string) => {
             category: {[x: string]: boolean};
             option: {
                 [x: string]: string | number | boolean;
+                mode: string;
                 round: number;
                 time: number;
             }
         } = JSON.parse(e.toString())
+        const validMode = ["choQuiz", "jungjongQuiz"]
         const category: string[] = []
         for (const key in data.category) {
             if (data.category[key]) category.push(key)
@@ -33,11 +35,13 @@ export default async (socket: SessionSocket, userId: string) => {
                 return send("generateRoom", {code: 403, value: "No option"})
         if (option.round <= 0 || option.time <= 0) return send("generateRoom", {code: 403, value: "Do not use minus"})
         if (category.length === 0) return send("generateRoom", {code: 403, value: "No category"})
+        if (!validMode.includes(data.option.mode)) return send("generateRoom", {code: 403, value: "Invalid mode"})
+
         const sha1 = crypto.createHash("sha1")
         sha1.update(`${rand(0, 999)}${category[0]}`)
         const roomId = sha1.digest("hex")
         if (!userId) return send("generateRoom", {code: 403, value: "No Login"}) 
-        await DB.generateRoom(roomId, category, userId, option.round, option.time * 1000)
+        await DB.generateRoom(roomId, category, data.option.mode, userId, option.round, option.time * 1000)
         return send("generateRoom", {code: 200, value: `/g/${roomId}`})
     })
     socket.on("getShop", async e => {

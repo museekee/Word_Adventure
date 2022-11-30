@@ -53,6 +53,11 @@ html
                                 span.Categories-leaf-description.Categories-leaf-text=item["DESCRIPTION"]
                     #Game-option 
                         h1 게임 설정
+                        div
+                            h2 게임 종류
+                            select#GameRule
+                                option(value="choQuiz") 초성퀴즈
+                                option(value="jungjongQuiz") 중종성퀴즈
                         div 
                             h2 라운드
                             span 
@@ -71,4 +76,4 @@ html
                         - for (let i = 0; i < SHOP_CATEGORIES.length; i++) 
                             button(id=`Shop-${SHOP_CATEGORIES[i]}` onclick=`getShop("${SHOP_CATEGORIES[i]}")`)=SHOP_ICONS[i]
             - else
-                h1 게임을 즐기시려면 로그인을 해야 합니다.
+                h1 게임을 즐기시려면 로그인을 해야합니다.

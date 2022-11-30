@@ -138,6 +138,7 @@ async function gameMake() {
     send("generateRoom", {
         category: selectedCategory,
         option: {
+            mode: document.getElementById("GameRule").value,
             round: document.getElementById("Round").value,
             time: document.getElementById("Time").value
         }

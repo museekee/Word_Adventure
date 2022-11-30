@@ -28,11 +28,12 @@ export async function getCategories() {
     conn.release()
     return rows
 }
-export async function generateRoom(rid: string, categories: string[], player: string, round: number, time: number) {
+export async function generateRoom(rid: string, categories: string[], mode: string, player: string, round: number, time: number) {
     const conn = await pool.getConnection()
     await conn.query(`INSERT INTO games (
         ID,
         CATEGORIES,
+        MODE,
         PLAYER,
         NOW_TIME,
         TIME,
@@ -42,6 +43,7 @@ export async function generateRoom(rid: string, categories: string[], player: st
     (
         ${conn.escape(rid)},
         ${conn.escape(JSON.stringify(categories))},
+        ${conn.escape(mode)},
         ${conn.escape(player)},
         ${conn.escape(time)},
         ${conn.escape(time)},

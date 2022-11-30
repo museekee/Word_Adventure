@@ -149,7 +149,7 @@ function renderFinishByData(data) {
     Elements.Result.WrongValue.innerText = `${data.WRONG}개`
     Elements.Result.PlayerValue.innerText = data.PLAYER
     Elements.Result.CategoryValue.innerText = JSON.parse(data.CATEGORIES).join("/")
-    Elements.Result.RuleValue.innerText = "미구현"
+    Elements.Result.RuleValue.innerText = `${data.MODE}`
     Elements.Result.ExpValue.innerText = `🟢 +${data.EXP}`
     Elements.Result.DamValue.innerText = `+${data.MONEY}🟡`
     Elements.Result.TimeValue.innerText = `${data.NOW_TIME / 1000}초`

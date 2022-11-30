@@ -10,6 +10,7 @@ declare namespace DB {
     interface Room extends RowDataPacket {
         ID: string;
         CATEGORIES: string;
+        MODE: "choQuiz" | "jungjongQuiz"
         PLAYER: string;
         NOW_ROUND: number;
         NOW_CATEGORY: string;

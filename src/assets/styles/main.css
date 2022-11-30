@@ -163,13 +163,14 @@ dama-leaf.Selected {
     text-align: center;
     color: #00eeff;
 }
-#Game-option input {
+#Game-option input, #Game-option select {
     border: none;
     outline: none;
     border-radius: 20px;
     font-size: 18px;
     padding: 5px;
     width: 100px;
+    appearance: none;
 }
 #Game-option div > span > span {
     font-size: 18px;
@@ -342,3 +343,6 @@ dialog {
                 text-align: right;
                 display: block;
             }
+select {
+    cursor: pointer;
+}

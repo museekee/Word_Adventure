@@ -1,4 +1,4 @@
-import express, { response } from "express"
+import express from "express"
 import config from "@lib/config.json"
 import path from "path"
 import * as NLog from "@lib/NyLog"
@@ -9,7 +9,7 @@ import Auth from "@lib/types/auth"
 import socketio from "socket.io"
 import { SessionSocket } from "@lib/types/app"
 import appSocket from "sockets/app.socket"
-import gameSocket from "sockets/game.socket"
+import damaSocket from "sockets/dama.socket"
 
 const app = express()
 const sessionStore = new MySQLStore({}, DB.pool)
@@ -70,7 +70,7 @@ io.on("connection", async (defsocket) => {
     NLog.Log("Connect lobby server", { ip: ip })
     const sessionId = socket.handshake.query.session
     const roomId = socket.handshake.query.roomId
-    const observe = socket.handshake.query.observe
+    const observe = socket.handshake.query.observe ? true : false
     if (!(typeof sessionId === "string")) return
     const existSid = await DB.isExistSession(sessionId)
     if (!existSid) return
@@ -82,15 +82,11 @@ io.on("connection", async (defsocket) => {
     else if (roomId) {
         if (!(typeof roomId === "string")) return
         if (!await DB.isExistRoom(roomId)) return
-        if (!observe && !((await DB.getRoomById(roomId)).PLAYER === sess.user.id)) return
-        else if (observe === "true") {
-            socket.join(roomId)
-            gameSocket(io, socket, roomId, "observer")
-        }
-        else if (!observe) {
-            socket.join(roomId)
-            gameSocket(io, socket, roomId, "player")
-        }
-        else return
+        const room = await DB.getRoomById(roomId)
+        if (!observe && !(room.PLAYER === sess.user.id)) return
+
+        socket.join(roomId)
+        if (["choQuiz", "jungjongQuiz"].includes(room.MODE))
+            return damaSocket(io, socket, roomId, observe, room.MODE)
     }
 })
