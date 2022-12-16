@@ -130,6 +130,21 @@ export async function getWordsByCategoryId(category: string, start: number, limi
     conn.release()
     return rows
 }
+export async function createCategory(id: string, name: string, description: string) {
+    const conn = await pool.getConnection()
+    await conn.query(`INSERT INTO categories (
+        ID,
+        NAME,
+        DESCRIPTION
+    )
+    VALUES
+    (
+        ${conn.escape(id)},
+        ${conn.escape(name)},
+        ${conn.escape(description)}
+    )`)
+    conn.release()
+}
 export async function getCategoryNameByCategoryId(category: string) {
     const conn = await pool.getConnection()
     const [rows]: [DB.Categories[], FieldPacket[]] = await conn.query(`SELECT NAME FROM categories WHERE ID = ${conn.escape(category)} LIMIT 1;`)

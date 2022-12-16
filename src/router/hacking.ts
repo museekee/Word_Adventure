@@ -43,6 +43,12 @@ router.post("/user/:id/apply", async (req, res) => {
     return res.send({code: 200})
 })
 
+router.post("/category/create", async (req, res) => {
+    const { id, name, description } = req.body.data
+    await DB.createCategory(id, name, description)
+    return res.send({code: 200})
+})
+
 router.post("/word", async (req, res) => {
     const { category, start, limit }: {category: string, start: number, limit: number} = req.body.data
     if (start <= 0 || limit <= 0) return res.sendStatus(403)

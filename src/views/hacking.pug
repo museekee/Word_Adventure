@@ -42,9 +42,18 @@ body
                         input#userData_Ban(type="checkbox")
             button(onclick="applyUser()") 적용
         .row
+            h2 카테고리 해킹
+            div
+                | 카테고리명 / 카테고리ID / 설명 : 
+                span.inpbtn
+                    input#categoryNameTbox(type="text")
+                    input#categoryIdTbox(type="text")
+                    input#categoryDescriptionTbox(type="text")
+                    button(onclick="generateCategory()") 생성
+        .row
             h2 단어 해킹
             div
-                | 단어 주제 / 시작점 / 개수 : 
+                | 단어 주제 / 개수(미사용) : 
                 span.inpbtn
                     select#wordLoadCategorySelector
                         - for (const category of categories)

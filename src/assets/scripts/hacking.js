@@ -12,6 +12,11 @@ const ELEMENTS = {
         CREATED_AT: document.getElementById("userData_CreatedAt"),
         BAN: document.getElementById("userData_Ban")
     },
+    category: {
+        id: document.getElementById("categoryIdTbox"),
+        name: document.getElementById("categoryNameTbox"),
+        description: document.getElementById("categoryDescriptionTbox")
+    },
     wordLoad: {
         categorySelector: document.getElementById("wordLoadCategorySelector"),
         start: document.getElementById("wordLoadStart"),
@@ -51,7 +56,21 @@ async function applyUser() {
         })
     }
 }
-
+async function generateCategory() {
+    const data = await (new request(`category/create`).post({
+        id: ELEMENTS.category.id.value,
+        name: ELEMENTS.category.name.value,
+        description: ELEMENTS.category.description.value
+    }))
+    if (data) {
+        return await swal.fire({
+            title: "성공!",
+            text: "성공적으로 카테고리를 추가하였습니다!",
+            icon: "success",
+            confirmButtonText: "확인"
+        })
+    }
+}
 async function searchWord() {
     const res = await (new request("word").post({
         category: ELEMENTS.wordLoad.categorySelector.value,
