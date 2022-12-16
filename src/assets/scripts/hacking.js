@@ -21,11 +21,15 @@ const ELEMENTS = {
         categorySelector: document.getElementById("wordLoadCategorySelector"),
         start: document.getElementById("wordLoadStart"),
         limit: document.getElementById("wordLoadLimit"),
-        list: document.getElementById("wordLoadList")
+        list: document.getElementById("wordLoadList"),
+        json: document.getElementById("wordJSON")
     },
     roomList: {
         list: document.getElementById("roomList")
     }
+}
+const $data = {
+    defWordData: []
 }
 async function searchUser() {
     const data = await (new request(`user/${ELEMENTS.userNameTbox.value}`).post())
@@ -78,6 +82,7 @@ async function searchWord() {
         limit: Number(ELEMENTS.wordLoad.limit.value)
     }))
     ELEMENTS.wordLoad.list.innerHTML = ""
+    $data.defWordData = []
     res.forEach(i => {
         const v = i["WORD"]
         const wordItem = document.createElement("word-item")
@@ -91,6 +96,7 @@ async function searchWord() {
         wordItem.appendChild(input)
         wordItem.appendChild(button)
         ELEMENTS.wordLoad.list.appendChild(wordItem)
+        $data.defWordData.push(v)
     })
 }
 /**
@@ -112,14 +118,25 @@ async function addWord() {
     ELEMENTS.wordLoad.list.appendChild(wordItem)
 }
 async function applyWord() {
-    const words = []
-    ELEMENTS.wordLoad.list.childNodes.forEach(wordItem => {
-        words.push(wordItem.childNodes[0].value)
-    })
-    await (new request("word/apply").post({
-        category: ELEMENTS.wordLoad.categorySelector.value,
-        words: words
-    }))
+    const type = document.querySelector('input[name="WordHackingType"]:checked').value
+    if (type === "ByDefUI") {
+        const words = []
+        ELEMENTS.wordLoad.list.childNodes.forEach(wordItem => {
+            words.push(wordItem.childNodes[0].value)
+        })
+        await (new request("word/apply").post({
+            category: ELEMENTS.wordLoad.categorySelector.value,
+            words: words
+        }))
+    }
+    else if (type === "ByJSON" && IsJsonString(ELEMENTS.wordLoad.json.value)) {
+        const words = JSON.parse(ELEMENTS.wordLoad.json.value)
+        const uniqWords = findUniqElem(words, $data.defWordData)
+        await (new request("word/apply/add").post({
+            category: ELEMENTS.wordLoad.categorySelector.value,
+            words: uniqWords
+        }))
+    }
 }
 
 async function loadRooms() {
@@ -193,4 +210,17 @@ class request {
         })
         else return await res.json()
     }
+}
+function IsJsonString(str) {
+    try {
+        var json = JSON.parse(str);
+        return (typeof json === 'object');
+    }
+    catch (e) {
+        return false;
+    }
+}
+function findUniqElem(arr1, arr2) {
+    return arr1.concat(arr2)
+      	.filter(item => !arr1.includes(item) || !arr2.includes(item));
 }

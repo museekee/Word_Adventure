@@ -53,6 +53,13 @@ body
         .row
             h2 단어 해킹
             div
+                div
+                    input(type="radio" name="WordHackingType" value="ByDefUI")
+                    label 기본 UI로 추가
+                div
+                    input(type="radio" name="WordHackingType" value="ByJSON" checked)
+                    label Array로 추가
+            div
                 | 단어 주제 / 개수(미사용) : 
                 span.inpbtn
                     select#wordLoadCategorySelector
@@ -63,6 +70,9 @@ body
                     button(onclick="searchWord()") 검색
                 #wordLoadList
                 button#addWordBtn(onclick="addWord()") 추가
+                h3 Array로 추가
+                    div
+                        textarea#wordJSON
             button(onclick="applyWord()") 적용
         .row
             h2 게임 방 해킹
