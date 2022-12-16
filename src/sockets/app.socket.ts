@@ -24,6 +24,9 @@ export default async (socket: SessionSocket, userId: string) => {
                 time: number;
             }
         } = JSON.parse(e.toString())
+        NLog.Log("tryMakeRoom", {
+            data: JSON.stringify(data)
+        })
         const validMode = ["choQuiz", "jungjongQuiz"]
         const category: string[] = []
         for (const key in data.category) {
@@ -32,15 +35,20 @@ export default async (socket: SessionSocket, userId: string) => {
         const option = data.option
         for (const key in option)
             if (!option[key]) 
-                return send("generateRoom", {code: 403, value: "No option"})
-        if (option.round <= 0 || option.time <= 0) return send("generateRoom", {code: 403, value: "Do not use minus"})
-        if (category.length === 0) return send("generateRoom", {code: 403, value: "No category"})
-        if (!validMode.includes(data.option.mode)) return send("generateRoom", {code: 403, value: "Invalid mode"})
-
+                return send("generateRoom", {code: 403, value: "옵션이 선택되지 않았습니다."})
+        let maximumRounds = 0
+        for (const value of category) {
+            maximumRounds += (await DB.getWordsByCategoryId(value, 1, 1)).length
+        }
+        console.log(maximumRounds)
+        if (maximumRounds < data.option.round) return send("generateRoom", {code: 403, value: `최대 라운드 수는 ${maximumRounds}라운드입니다.`})
+        if (option.round <= 0 || option.time <= 0) return send("generateRoom", {code: 403, value: "0이하의 수는 사용할 수 없습니다."})
+        if (category.length === 0) return send("generateRoom", {code: 403, value: "카테고리가 선택되지 않았습니다."})
+        if (!validMode.includes(data.option.mode)) return send("generateRoom", {code: 403, value: "알 수 없는 모드입니다."})
         const sha1 = crypto.createHash("sha1")
         sha1.update(`${rand(0, 999)}${category[0]}`)
         const roomId = sha1.digest("hex")
-        if (!userId) return send("generateRoom", {code: 403, value: "No Login"}) 
+        if (!userId) return send("generateRoom", {code: 403, value: "로그인을 해주세요."}) 
         await DB.generateRoom(roomId, category, data.option.mode, userId, option.round, option.time * 1000)
         return send("generateRoom", {code: 200, value: `/g/${roomId}`})
     })

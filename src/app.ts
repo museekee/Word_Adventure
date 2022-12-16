@@ -49,10 +49,14 @@ app.get("/", async (req, res) => {
         user.exp = dbUser.EXP
         user.money = dbUser.MONEY
     }
+    NLog.Log("Connected main", {
+        id: req.session.user?.id ? req.session.user.id : "undefined",
+        ip: req.ip
+    })
     res.render("main", {
         categories: await DB.getCategories(),
         user,
-        sessionId: req.session.id
+        ws: `ws://${req.get("host")}?session=${req.session.id}`
     })
 })
 app.get("/ziu/:itemId", async (req, res) => {

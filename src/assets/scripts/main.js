@@ -1,10 +1,10 @@
 const selectedCategory = {}
 const $data = {
-    sessionId: document.getElementById("sessionId").innerText,
     profile: undefined,
     shop: undefined
 };
 const elements = {
+    ws: document.getElementById("ws").innerText,
     profile: {
         damBar: document.getElementById("Dam-bar"),
         damBarValue: document.getElementById("Dam-bar-value"),
@@ -29,7 +29,7 @@ const elements = {
     }
 }
 
-const socket = io.connect(`http://localhost`, {query: {session: $data.sessionId}})
+const socket = io.connect(elements.ws)
 /**
  * @param {HTMLElement} elem
  */

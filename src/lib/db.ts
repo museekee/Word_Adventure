@@ -78,7 +78,8 @@ export async function updateRoomByRoomData(roomData: DB.Room) {
         ANSWER = ${conn.escape(roomData.ANSWER)},
         WRONG = ${conn.escape(roomData.WRONG)},
         EXP = ${conn.escape(roomData.EXP)},
-        MONEY = ${conn.escape(roomData.MONEY)}
+        MONEY = ${conn.escape(roomData.MONEY)},
+        USED = ${conn.escape(roomData.USED)}
     WHERE
         ID = ${conn.escape(roomData.ID)}`)
     conn.release()

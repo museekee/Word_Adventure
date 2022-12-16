@@ -21,6 +21,7 @@ declare namespace DB {
         MONEY: number;
         TIME: number;
         ROUND: number;
+        USED: string;
     }
     interface Word extends RowDataPacket {
         WORD: string;

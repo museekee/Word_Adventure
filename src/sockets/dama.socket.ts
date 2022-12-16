@@ -5,7 +5,8 @@ import SocketIO from "socket.io"
 export default async (io: SocketIO.Server, socket: SessionSocket, roomId: string, observe: boolean, quizType: "choQuiz" | "jungjongQuiz") => {
     const room = await DB.getRoomById(roomId)
     const categories: string[] = JSON.parse(room.CATEGORIES)
-    
+    const used: string[] = JSON.parse(room.USED)
+
     await send("init", {
         maxRound: room.ROUND,
         maxTime: room.TIME,
@@ -16,13 +17,21 @@ export default async (io: SocketIO.Server, socket: SessionSocket, roomId: string
             question: disassemble_hangul(room.ANSWER),
             nowCategory: room.NOW_CATEGORY
         })
-        room.NOW_CATEGORY = categories[Math.floor(Math.random()*categories.length)]
-        room.ANSWER = await DB.getRandomWordByCategory(room.NOW_CATEGORY)
-        await DB.updateRoomByNewRound(room.ID, room.NOW_CATEGORY, room.ANSWER)
-        await send("newRound", {
-            question: disassemble_hangul(room.ANSWER),
-            nowCategory: room.NOW_CATEGORY
-        })
+        const newCategory = categories[Math.floor(Math.random()*categories.length)]
+        const newAnswer = await DB.getRandomWordByCategory(newCategory)
+        const newQuestion = disassemble_hangul(newAnswer)
+        if (!used.includes(newQuestion)) {
+            used.push(newQuestion)
+            room.USED = JSON.stringify(used)
+            room.NOW_CATEGORY = newCategory
+            room.ANSWER = newAnswer
+            await DB.updateRoomByRoomData(room)
+            await send("newRound", {
+                question: newQuestion,
+                nowCategory: room.NOW_CATEGORY
+            })
+        }
+        else await newRound()
     }
     await newRound()
     socket.on("newRound", newRound)
