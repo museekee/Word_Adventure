@@ -77,8 +77,14 @@ export default async (io: SocketIO.Server, socket: SessionSocket, roomId: string
         await DB.deleteRoomById(room.ID)
     }
     function disassemble_hangul(str: string) {
+        const korean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/;
         const result = []
         for (let i = 0; i < str.length; i++) {
+            const word = String.fromCharCode(str.charCodeAt(i))
+            if (!korean.test(word)) {
+                result.push(word)
+                continue
+            }
             const uni = str.charCodeAt(i) - 44032;
             const cho = ((uni / 28) / 21) + 4352;
             const jung = ((uni / 28) % 21) + 4449;

@@ -188,10 +188,6 @@ class request {
         else return await res.json()
     }
     async post(data) {
-        console.log(JSON.stringify({
-            key: ELEMENTS.passwordTbox.value,
-            data: data ? data : undefined
-        }))
         const res = await fetch(`${window.location.pathname}/${this.url}`, {
             method: "POST",
             headers: {
