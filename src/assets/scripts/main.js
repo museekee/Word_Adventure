@@ -1,11 +1,20 @@
 const selectedCategory = {}
 const $data = {
     profile: undefined,
-    shop: undefined
+    shop: undefined,
+    EXP: [],
+    MAX_LEVEL: 99
 };
+$data.EXP.push(getRequiredScore(1));
+for(i=2; i<$data.MAX_LEVEL; i++){
+    $data.EXP.push(getRequiredScore(i));
+}
+$data.EXP[$data.MAX_LEVEL - 1] = Infinity;
+$data.EXP.push(Infinity);
 const elements = {
     ws: document.getElementById("ws").innerText,
     profile: {
+        nickname: document.getElementById("Nickname"),
         damBar: document.getElementById("Dam-bar"),
         damBarValue: document.getElementById("Dam-bar-value"),
         expBar: document.getElementById("Exp-bar"),
@@ -213,13 +222,33 @@ async function onMouseOut_ShopItem() {
         })
     }
 }
+function getRequiredScore(lv) {
+    return Math.round((lv * Math.sqrt(lv)) * 500)
+}
+function getLevel(score){
+	let i;
+
+	for(i = 0; i < $data.EXP.length; i++) if(score < $data.EXP[i]) break;
+	return i+1;
+}
 async function renderProfile() {
     //* set exp and dam
     elements.profile.damBarValue.innerText = `${$data.profile.money}━${$data.profile.money}`
     elements.profile.damBar.style.height = `100%`
-    elements.profile.expBarValue.innerText = `${$data.profile.exp}`
-    elements.profile.expBar.style.height = `100%`
+    {
+        const requiredScore = getRequiredScore(getLevel($data.profile.exp))
+        console.log(getLevel($data.profile.exp))
+        if ($data.EXP[getLevel($data.profile.exp) - 1] === Infinity) {
+            elements.profile.expBarValue.innerText = `${$data.profile.exp}━만렙`
+            elements.profile.expBar.style.height = `100%`
+        }
+        else {
+            elements.profile.expBarValue.innerText = `${$data.profile.exp}━${requiredScore}`
+            elements.profile.expBar.style.height = `${($data.profile.exp / requiredScore) * 100}%`
+        }
+    }
     //* set ziu
+    elements.profile.nickname.innerText = `[${getLevel($data.profile.exp)}] 내 캐릭터`
     elements.profile.ziu.innerHTML = ""
     elements.dialog.profile.charactor.miniZiu.innerHTML = ""
     const ITEM_CATEGORIES = ["body", "eye", "mouth", "ear", "clothes", "glasses", "hat", "hand"]
