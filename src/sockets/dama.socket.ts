@@ -60,6 +60,30 @@ export default async (io: SocketIO.Server, socket: SessionSocket, roomId: string
         }
         await DB.updateRoomByRoomData(room)
     })
+    socket.on("useItem", async e => {
+        if (observe) return await send("observe", {value: "플레이어 외의 유저는 아이템을 사용할 수 없습니다."})
+        const data: {value: string} = JSON.parse(e)
+        console.log(data)
+        const user = await DB.getUserById(room.PLAYER)
+        switch (data.value) {
+            case "hint": {
+                if (user.MONEY < 1000) return await send("useItem", {code: 403, value: `돈이 부족합니다.<br/>${1000 - user.MONEY}담 필요`})
+                
+                return;
+            }
+            case "skip": {
+                if (user.MONEY < 10000) return await send("useItem", {code: 403, value: `돈이 부족합니다.<br/>${10000 - user.MONEY}담 필요`})
+                await DB.setUserExpAndMoney(room.PLAYER, 0, -10000)
+                if (room.NOW_ROUND === room.ROUND)
+                    return await finish()
+                else {
+                    room.EXP += (data.value.length * 5 + rand(0, 10))
+                    room.NOW_ROUND++
+                    return await send("correct", {value: true, answer: room.ANSWER})
+                }
+            }
+        }
+    })
     socket.on("timeout", async () => {
         if (observe) return
         await finish()

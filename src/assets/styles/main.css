@@ -1,5 +1,6 @@
 body {
     margin: 0;
+    height: 100%;
 }
 #main {
     background: url("/assets/images/background.png");
@@ -71,8 +72,8 @@ button {
     background: linear-gradient(to bottom, #00ff00, #00ffee);
 }
 #Ziu {
-    display: inline-block;
-    width: 500px;
+    display: block;
+    width: 100%;
     height: 500px;
     grid-column: 2;
     grid-row: 2;
@@ -126,7 +127,7 @@ dama-leaf.Selected {
     filter: none;   
 }
 #Categories {
-    height: 100%;
+    height: calc(100vh - 175px);
     display: inline-flex;
     flex-direction: row;
     flex-wrap: wrap;

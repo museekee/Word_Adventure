@@ -6,7 +6,7 @@ body {
     display: grid;
     width: 100%;
     height: calc(100% - 50px);
-    grid-template-columns: 335px 1fr 335px;
+    grid-template-columns: 335px 88fr 12fr 335px;
     grid-template-rows: 2fr 1fr;
 }
 #Round_time_back {
@@ -18,7 +18,7 @@ body {
     color: #000000;
 }
 #All_time_back {
-    grid-column: 3;
+    grid-column: 4;
 }
 #All_time_value {
     height: 100%;
@@ -60,9 +60,40 @@ body {
     align-items: center;
     justify-content: center;
 }
+#Items {
+    display: flex;
+    grid-column: 3;
+    margin-left: 25px;
+    background: #34a74d;
+    border-radius: 100px;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-evenly;
+}
+    .GameItem {
+        display: flex;
+        width: 100px;
+        height: 100px;
+        background: #00000033;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: center;
+        padding: 10px;
+        border-radius: 50%;
+        cursor: pointer;
+    }
+        .GameItem > img {
+            width: 100%;
+            height: calc(100% - 30px);
+            display: block;
+        }
+        .GameItem > span {
+            font-weight: bold;
+        }
 #Bottom {
     display: grid;
-    grid-column: 2;
+    grid-column: 2 / 4;
     grid-row: 2;
     grid-template-columns: 2fr 1fr;
 }

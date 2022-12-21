@@ -12,6 +12,13 @@ html
                 #Round_time_value
                     | 60
             #Word 게임 준비중
+            #Items
+                button.GameItem(data-item-name="hint")
+                    img(src="/assets/images/magnifier.svg")
+                    span 힌트 (1000)
+                button.GameItem(data-item-name="skip")
+                    img(src="/assets/images/skip.svg")
+                    span 스킵 (10000)
             #Bottom 
                 input#Word-write(type="text" onKeypress="javascript:if(event.keyCode==13) {answer()}")
                 #Info

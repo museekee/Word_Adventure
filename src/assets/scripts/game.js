@@ -58,6 +58,14 @@ async function timerCb() {
     Elements.RoundTimeValue.style.height = `${$data.room.time.nowRoundTime / $data.room.time.roundTime * 100}%`
     $data.oldTick = nowTime
 }
+for (const elem of document.getElementsByClassName("GameItem")) {
+    elem.addEventListener("click", () => {
+        send("useItem", {
+            value: elem.dataset.itemName
+        })
+    })
+}
+
 socket.on("init", async e => {
     const data = JSON.parse(e)
     $data.room.maxRound = data.maxRound
@@ -77,6 +85,17 @@ socket.on("newRound", async e => {
     if ($data.room.time.nowRoundTime > $data.room.time.nowAllTime) $data.room.time.nowRoundTime = $data.room.time.nowAllTime // 남은 전체 타임이 라운드 타임보다 작을 때
     else $data.room.time.nowRoundTime = $data.room.time.roundTime
 })
+socket.on("useItem", async e => {
+    const data = JSON.parse(e)
+    if (data.code === 403) {
+        return swal.fire({
+            title: "오류!",
+            html: data.value,
+            icon: 'error',
+            confirmButtonText: '확인'
+        })
+    }
+})
 socket.on("room", async e => {
     const data = JSON.parse(e)
     $data.room.category = data.category
@@ -92,28 +111,29 @@ socket.on("room", async e => {
 socket.on("correct", async e => {
     const data = JSON.parse(e)
     Elements.WordWrite.value = ""
+    Elements.WordWrite.setAttribute("disabled", "")
+    clearInterval($data.timer)
+    Elements.Word.innerText = data.answer
+    for (const elem of document.getElementsByClassName("GameItem")) {
+        elem.setAttribute("disabled", "")
+    }
     if (data.value) {
         Elements.Word.style.color = "#ffffff"
-        Elements.Word.innerText = data.answer
-        clearInterval($data.timer)
-        Elements.WordWrite.setAttribute("disabled", "")
         await sleep(1000)
-        Elements.WordWrite.removeAttribute("disabled")
-        Elements.WordWrite.focus()
         $data.timer = setInterval(timerCb, $data.TICK)
         send("newRound")
     }
     else {
         Elements.Word.style.color = "#ff0000"
-        Elements.Word.innerText = data.answer
-        clearInterval($data.timer)
-        Elements.WordWrite.setAttribute("disabled", "")
         await sleep(1000)
-        Elements.WordWrite.removeAttribute("disabled")
-        Elements.WordWrite.focus()
         $data.timer = setInterval(timerCb, $data.TICK)
         Elements.Word.style.color = "#ffffff"
         Elements.Word.innerText = $data.room.question
+    }
+    Elements.WordWrite.removeAttribute("disabled")
+    Elements.WordWrite.focus()
+    for (const elem of document.getElementsByClassName("GameItem")) {
+        elem.removeAttribute("disabled")
     }
 })
 socket.on("finish", async e => {

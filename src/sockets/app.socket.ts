@@ -36,13 +36,16 @@ export default async (socket: SessionSocket, userId: string) => {
         for (const key in option)
             if (!option[key]) 
                 return send("generateRoom", {code: 403, value: "옵션이 선택되지 않았습니다."})
+        data.option.round = Number(data.option.round)
+        data.option.time = Number(data.option.time)
         let maximumRounds = 0
         for (const value of category) {
             maximumRounds += (await DB.getWordsByCategoryId(value, 1, 1)).length
         }
-        console.log(maximumRounds)
+        console.log(option.time, 2147483647)
         if (maximumRounds < data.option.round) return send("generateRoom", {code: 403, value: `최대 라운드 수는 ${maximumRounds}라운드입니다.`})
-        if (option.round <= 0 || option.time <= 0) return send("generateRoom", {code: 403, value: "0이하의 수는 사용할 수 없습니다."})
+        if (option.round <= 0 || option.time <= 0) return send("generateRoom", {code: 403, value: "0 이하의 수는 사용할 수 없습니다."})
+        if (option.round >= 2147483647 || option.time >= 2147483647 || data.option.round >= 2147483647) return send("generateRoom", {code: 403, value: "2147483647 초과의 수는 사용할 수 없습니다."})
         if (category.length === 0) return send("generateRoom", {code: 403, value: "카테고리가 선택되지 않았습니다."})
         if (!validMode.includes(data.option.mode)) return send("generateRoom", {code: 403, value: "알 수 없는 모드입니다."})
         const sha1 = crypto.createHash("sha1")
