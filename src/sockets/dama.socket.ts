@@ -14,20 +14,21 @@ export default async (io: SocketIO.Server, socket: SessionSocket, roomId: string
     })
     async function newRound() {
         if (observe) return await send("newRound", {
-            question: disassemble_hangul(room.ANSWER),
+            question: room.QUESTION,
             nowCategory: room.NOW_CATEGORY
         })
         const newCategory = categories[Math.floor(Math.random()*categories.length)]
         const newAnswer = await DB.getRandomWordByCategory(newCategory)
         const newQuestion = disassemble_hangul(newAnswer)
         if (!used.includes(newQuestion)) {
-            used.push(newQuestion)
+            room.QUESTION = newQuestion
+            used.push(room.QUESTION)
             room.USED = JSON.stringify(used)
             room.NOW_CATEGORY = newCategory
             room.ANSWER = newAnswer
             await DB.updateRoomByRoomData(room)
             await send("newRound", {
-                question: newQuestion,
+                question: room.QUESTION,
                 nowCategory: room.NOW_CATEGORY
             })
         }
@@ -67,13 +68,17 @@ export default async (io: SocketIO.Server, socket: SessionSocket, roomId: string
         const user = await DB.getUserById(room.PLAYER)
         switch (data.value) {
             case "hint": {
-                if (user.MONEY < 1000) return await send("useItem", {code: 403, value: `돈이 부족합니다.<br/>${1000 - user.MONEY}담 필요`})
-                
-                return;
+                try {
+                    if (user.MONEY < 1000) return await send("useItem", {code: 403, value: `돈이 부족합니다.<br/>${1000 - user.MONEY}담 필요`})
+                    return await send("hint", {code: 200, value: hint()});
+                }
+                catch (e: any) {
+                    if (e === "Identified all the initial consonants") return await send("hint", {code: 403, value: "이미 모든 초성을 밝혀냈습니다."});
+                }
             }
             case "skip": {
-                if (user.MONEY < 10000) return await send("useItem", {code: 403, value: `돈이 부족합니다.<br/>${10000 - user.MONEY}담 필요`})
-                await DB.setUserExpAndMoney(room.PLAYER, 0, -10000)
+                if (user.MONEY < 8000) return await send("useItem", {code: 403, value: `돈이 부족합니다.<br/>${10000 - user.MONEY}담 필요`})
+                await DB.setUserExpAndMoney(room.PLAYER, 0, -8000)
                 if (room.NOW_ROUND === room.ROUND)
                     return await finish()
                 else {
@@ -117,6 +122,20 @@ export default async (io: SocketIO.Server, socket: SessionSocket, roomId: string
             else if (quizType === "jungjongQuiz") result.push(String.fromCharCode(4447) + String.fromCharCode(jung) + (jong !== 4519 ? String.fromCharCode(jong) : ""))
         }
         return result.join("")
+    }
+    function hint(): string {
+        if (room.ANSWER === room.QUESTION) throw "Identified all the initial consonants"
+        const korean = /[가-힣]/;
+        const answerArr = room.ANSWER.split("")
+        const hintidx = rand(0, answerArr.length - 1)
+        if (!korean.test(answerArr[hintidx])) return hint() // 밝혀주려 하는게 한글이 아닐 경우
+        const questionArr = room.QUESTION.split("")
+        questionArr[hintidx] = answerArr[hintidx]
+        const newQuestion = questionArr.join("")
+        if (newQuestion === room.QUESTION) return hint() // 전에 보여준 것과 같을 경우
+        room.QUESTION = newQuestion
+        DB.updateRoomByRoomData(room)
+        return newQuestion
     }
     async function send(type: string, data?: any) {
         if (observe) {

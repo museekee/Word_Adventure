@@ -252,6 +252,8 @@ dialog {
     right: 0;
     margin: auto;
     z-index: 9;
+    opacity: 1;
+    transition: all 1s;
 }
 .dialog-header {
     background: #000000;

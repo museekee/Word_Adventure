@@ -96,6 +96,22 @@ socket.on("useItem", async e => {
         })
     }
 })
+socket.on("hint", async e => {
+    const data = JSON.parse(e)
+    console.log(data)
+    if (data.code === 200) {
+        $data.room.question = data.value
+        Elements.Word.innerText = $data.room.question
+    }
+    if (data.code === 403) {
+        return swal.fire({
+            title: "오류!",
+            html: data.value,
+            icon: 'error',
+            confirmButtonText: '확인'
+        }) 
+    }
+})
 socket.on("room", async e => {
     const data = JSON.parse(e)
     $data.room.category = data.category

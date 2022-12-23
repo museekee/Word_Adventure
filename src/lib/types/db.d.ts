@@ -15,6 +15,7 @@ declare namespace DB {
         NOW_ROUND: number;
         NOW_CATEGORY: string;
         NOW_TIME: number;
+        QUESTION: string;
         ANSWER: string;
         WRONG: number;
         EXP: number;

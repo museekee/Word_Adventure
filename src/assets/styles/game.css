@@ -45,6 +45,7 @@ body {
     text-orientation: upright;
     text-align: center;
     font-weight: bold;
+    transition: all 100ms;
 }
 #Word, #Word-write {
     font-weight: bold;

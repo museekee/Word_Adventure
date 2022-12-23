@@ -75,6 +75,7 @@ export async function updateRoomByRoomData(roomData: DB.Room) {
         NOW_ROUND = ${conn.escape(roomData.NOW_ROUND)},
         NOW_CATEGORY = ${conn.escape(roomData.NOW_CATEGORY)},
         NOW_TIME = ${conn.escape(roomData.NOW_TIME)},
+        QUESTION = ${conn.escape(roomData.QUESTION)},
         ANSWER = ${conn.escape(roomData.ANSWER)},
         WRONG = ${conn.escape(roomData.WRONG)},
         EXP = ${conn.escape(roomData.EXP)},
