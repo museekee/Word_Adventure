@@ -11,10 +11,10 @@ html
         #ws(style="display: none;")=ws
     body
         #dialogs
-            dialog#Profile-dialog(style="width: 1000px; height: 600px;")
+            dialog#Profile-dialog(style="width: 1000px; height: 600px;" open)
                 .dialog-header
                     h1 !오류로 인해 아이템이 갑자기 없어지더라도 보상 안함!
-                    .dialog-close(onclick="document.getElementById('Profile-dialog').close()")
+                    .dialog-close
                 #Profile-dialog-main
                     #Charactor
                         #Mini-ziu

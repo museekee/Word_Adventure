@@ -105,3 +105,4 @@ dist
 
 src/lib/config.json
 src/lib/auth.json
+test.ts

@@ -43,7 +43,7 @@ const socket = io.connect(elements.ws)
  * @param {HTMLElement} elem
  */
 
- socket.on("generateRoom", async e => {
+socket.on("generateRoom", async e => {
     const data = JSON.parse(e)
     if (data.code === 403) {
         await swal.fire({
@@ -177,7 +177,8 @@ async function unEquipItem(itemId) {
 }
 async function onClick_Menu(id, isDialog) {
     if (isDialog) {
-        elements.dialog[id].main.show()
+        elements.dialog[id].main.style.display = "grid"
+        setTimeout(() => elements.dialog[id].main.style.opacity = "1", 10)
     }
     else {
         for (const [key, value] of Object.entries(elements.board)) {
@@ -185,6 +186,12 @@ async function onClick_Menu(id, isDialog) {
         }
         elements.board[id].style.display = "grid"
     }
+}
+for (const item of document.getElementsByClassName("dialog-close")) {
+    item.addEventListener("click", () => {
+        document.getElementById('Profile-dialog').style.opacity = `0`
+        setTimeout(() => document.getElementById('Profile-dialog').style.display = `none`, 500)
+    })
 }
 function send(type, data) {
     if (!data) return socket.emit(type, null)

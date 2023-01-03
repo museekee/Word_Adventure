@@ -86,6 +86,7 @@ button {
 }
 #Dam-bar {
     background: #f3f36c;
+    transition: all 500ms;
 }
 #Exp > span, #Dam > span {
     display: block;
@@ -252,8 +253,8 @@ dialog {
     right: 0;
     margin: auto;
     z-index: 9;
-    opacity: 1;
-    transition: all 1s;
+    opacity: 0;
+    transition: all 500ms;
 }
 .dialog-header {
     background: #000000;

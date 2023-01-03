@@ -69,16 +69,18 @@ export default async (io: SocketIO.Server, socket: SessionSocket, roomId: string
         switch (data.value) {
             case "hint": {
                 try {
-                    if (user.MONEY < 1000) return await send("useItem", {code: 403, value: `돈이 부족합니다.<br/>${1000 - user.MONEY}담 필요`})
-                    return await send("hint", {code: 200, value: hint()});
+                    if (user.MONEY < 250) return await send("useItem", {code: 403, value: `돈이 부족합니다.<br/>${250 - user.MONEY}담 필요`})
+                    const hintres = hint()
+                    await DB.setUserExpAndMoney(room.PLAYER, 0, -250)
+                    return await send("hint", {code: 200, value: hintres});
                 }
                 catch (e: any) {
                     if (e === "Identified all the initial consonants") return await send("hint", {code: 403, value: "이미 모든 초성을 밝혀냈습니다."});
                 }
             }
             case "skip": {
-                if (user.MONEY < 8000) return await send("useItem", {code: 403, value: `돈이 부족합니다.<br/>${10000 - user.MONEY}담 필요`})
-                await DB.setUserExpAndMoney(room.PLAYER, 0, -8000)
+                if (user.MONEY < 5000) return await send("useItem", {code: 403, value: `돈이 부족합니다.<br/>${5000 - user.MONEY}담 필요`})
+                await DB.setUserExpAndMoney(room.PLAYER, 0, -5000)
                 if (room.NOW_ROUND === room.ROUND)
                     return await finish()
                 else {
