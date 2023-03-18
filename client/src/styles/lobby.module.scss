@@ -1,0 +1,94 @@
+#stage {
+    display: grid;
+    grid-template-rows: 1fr 100px;
+    height: 100vh;
+}
+#page {
+    display: grid;
+    grid-template-rows: 75px 1fr 60px;
+    border-radius: 50px;
+    margin: 30px 125px;
+    background: #eeeeee;
+
+    .header {
+        display: flex;
+        width: 100%;
+        height: 75px;
+        background: #00aaff;
+        border-radius: 50px 50px 0px 0px;
+        font-size: 40px;
+        color: #ffffff;
+        font-weight: bold;
+        align-items: center;
+        justify-content: center;
+    }
+    .YesOrNo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-top: 3px solid #555555;
+        gap: 20px;
+
+        * {
+            display: flex;
+            font-size: 25px;
+            font-weight: bold;
+            align-items: center;
+            justify-content: center;
+            height: 50px;
+            border-radius: 10px;
+            color: #ffffff;
+            cursor: pointer;
+        }
+        .yes {
+            width: 150px;
+            background: #4d96ff;
+        }
+        .no {
+            width: 100px;
+            background: #ff6b6b;
+        }
+    }
+}
+#bottomBar {
+    display: grid;
+    width: 100%;
+    height: 100px;
+    background: #eeeeee;
+    grid-row: 2;
+    grid-template-columns: 20fr 60fr 20fr;
+
+    > *{
+        display: flex;
+    }
+    .center {
+        grid-column: 2;
+        justify-content: center;
+    }
+    .right {
+        grid-column: 3;
+        justify-content: flex-end;
+    }
+    button {
+        display: grid;
+        grid-template-rows: auto auto;
+        justify-items: center;
+        width: 150px;
+        height: 100%;
+        cursor: pointer;
+        transition: background 250ms;
+
+        .icon {
+            height: 65px;
+        }
+        .desc {
+            color: #999999;
+            font-family: "NanumGothicExtraBold";
+            font-weight: bolder;
+            font-size: 20px;
+        }
+    }
+    button:hover {
+        background: #00000011;
+    }
+}
