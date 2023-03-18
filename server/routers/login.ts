@@ -6,30 +6,29 @@ const MySQLStore = require("express-mysql-session")(session)
 import passport from "passport"
 import passportGoogle from "passport-google-oauth2"
 import cors from 'cors'
+import { PushUser } from "../libs/DB"
 const GoogleStrategy = passportGoogle.Strategy
 
 const router = express.Router()
 
 const sessionStore = new MySQLStore(config.DB)
 
-router.use(
-    session({
-        secret: auth.google.secret,
-        store: sessionStore,
-        resave: false,
-        saveUninitialized: false
-    })
-)
+router.use(session({
+    secret: config.sessionSercet,
+    store: sessionStore,
+    resave: false,
+    saveUninitialized: false
+}))
 router.use(cors({origin: "http://localhost:3000", credentials:true}));
 router.use(passport.initialize())
 router.use(passport.session())
 
-passport.serializeUser((user: any, done) => {
+passport.serializeUser(async (user: any, done) => {
     done(null, user.id);
     console.log("serialize", user)
 })
 
-passport.deserializeUser((id: any, done) => {
+passport.deserializeUser(async (id: any, done) => {
     done(null, id);
     console.log("deserialize", id)
 })
@@ -42,9 +41,17 @@ passport.use(
             callbackURL: "http://localhost:3000/login/google/callback",
             passReqToCallback: true,
         },
-        function (request: any, accessToken: any, refreshToken: any, profile: any, done: (arg0: null, arg1: any) => any) {
+        async (request: any, accessToken: any, refreshToken: any, profile: any, done: (arg0: null, arg1: any) => any) => {
             console.log(profile);
             console.log(accessToken);
+            
+            await PushUser({
+                id: profile.id,
+                nick: profile.displayName,
+                email: profile.email,
+                pfp: profile.picture,
+                provider: profile.provider
+            })
 
             return done(null, profile);
         }
