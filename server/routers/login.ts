@@ -25,12 +25,10 @@ router.use(passport.session())
 
 passport.serializeUser(async (user: any, done) => {
     done(null, user.id);
-    console.log("serialize", user)
 })
 
 passport.deserializeUser(async (id: any, done) => {
     done(null, id);
-    console.log("deserialize", id)
 })
 
 passport.use(
@@ -42,9 +40,6 @@ passport.use(
             passReqToCallback: true,
         },
         async (request: any, accessToken: any, refreshToken: any, profile: any, done: (arg0: null, arg1: any) => any) => {
-            console.log(profile);
-            console.log(accessToken);
-            
             await PushUser({
                 id: profile.id,
                 nick: profile.displayName,
@@ -66,13 +61,8 @@ router.get(
     passport.authenticate("google", { scope: ["email", "profile"] })
 )
 router.get("/logout", (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            console.log(`dd" ${err}`)
-            return res.sendStatus(500)
-        }
-        else return res.sendStatus(200)
-    });
-    res.redirect("/login");
+    req.logout(() => {
+        res.redirect("/")
+    })
 })
 export default router

@@ -6,14 +6,6 @@ import axios from "axios"
 import MyData from "../components/myData"
 
 function Lobby() {
-  const pages = [
-    {
-      name: "방 만들기",
-      icon: imgs.Plus,
-      page: <CreateRoom />,
-      onOk: () => console.log("방 만들기")
-    }
-  ]
   const [user, setUser] = useState({id: null, nick: null, pfp: null});
   useEffect(() => {
     let completed = false
@@ -26,7 +18,15 @@ function Lobby() {
       completed = true
     };
   }, [])
-  console.log(user)
+  
+  const pages = [
+    {
+      name: "방 만들기",
+      icon: imgs.Plus,
+      page: <CreateRoom />,
+      onOk: () => console.log("방 만들기")
+    }
+  ]
   const bottomRights: {name: string, icon: string, page?: JSX.Element, onClick?: () => void, onOk?: () => void}[] = [
     {
       name: user.nick == null ? "로그인" : "프로필",
