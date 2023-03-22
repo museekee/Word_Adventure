@@ -12,7 +12,7 @@ export const GetUser = async (id: string) => {
         .select("*")
         .where("id", id)
         .from("users")
-    if (data.length == 0) return null
+    if (data.length === 0) return null
     return data[0]
 }
 export const ExistUser = async (id: string) => {
@@ -27,4 +27,13 @@ export const PushUser = async ({id, nick, email, pfp, provider}: {id: string, ni
             PFP: pfp,
             PROVIDER: provider
         })
+}
+
+export const LoginedBySession = async (sid: string) => {
+    const data: DB.Session[] = await knex
+        .select("*")
+        .where("session_id", sid)
+        .from("sessions")
+    if (data.length === 0) return false
+    else return true
 }

@@ -2,10 +2,12 @@ import express from "express"
 import session from "express-session"
 import loginRouter from "./routers/login"
 import config from "./configs/config.json"
-import { GetUser } from "./libs/DB"
+import { GetUser, LoginedBySession } from "./libs/DB"
 const MySQLStore = require("express-mysql-session")(session)
 const sessionStore = new MySQLStore(config.DB)
 const app = express()
+import socketio from "socket.io"
+import lobbySocket from "./sockets/lobby"
 
 app.use('/login', loginRouter);
 app.use(session({
@@ -28,9 +30,20 @@ app.get("/myData", async (req, res) => {
             id: user.ID,
             nick: user.NICK,
             pfp: user.PFP,
+            sessId: req.session.id
         })
     }
     return res.status(404).send({code: 404})
 })
 
-app.listen(3840)
+const server = app.listen(3840)
+
+const io = new socketio.Server(server)
+io.on("connection", async (defsocket) => {
+    const sessid = defsocket.handshake.query["session"]
+    if (!sessid) return
+    const isLogined = await LoginedBySession(sessid.toString())
+    if (!isLogined) return
+    defsocket.join("lobby")
+    lobbySocket(defsocket)
+})

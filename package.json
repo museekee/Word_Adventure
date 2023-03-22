@@ -9,7 +9,8 @@
     "mysql": "^2.18.1",
     "nodemon": "^2.0.20",
     "passport": "^0.6.0",
-    "passport-google-oauth2": "^0.2.0"
+    "passport-google-oauth2": "^0.2.0",
+    "socket.io": "^4.6.1"
   },
   "name": "word_adventure",
   "version": "1.0.0",

@@ -69,26 +69,4 @@
         grid-column: 3;
         justify-content: flex-end;
     }
-    button {
-        display: grid;
-        grid-template-rows: auto auto;
-        justify-items: center;
-        width: 150px;
-        height: 100%;
-        cursor: pointer;
-        transition: background 250ms;
-
-        .icon {
-            height: 65px;
-        }
-        .desc {
-            color: #999999;
-            font-family: "NanumGothicExtraBold";
-            font-weight: bolder;
-            font-size: 20px;
-        }
-    }
-    button:hover {
-        background: #00000011;
-    }
 }
