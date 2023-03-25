@@ -4,48 +4,61 @@ import { useEffect, useState } from "react"
 import CreateRoom from "../components/createRoom"
 import axios from "axios"
 import MyData from "../components/myData"
-import io from 'socket.io-client'
-import { Socket } from 'socket.io-client/build/esm/socket'
 import Swal from "sweetalert2"
 import BottomButton from "../components/bottomButton"
-
-let socket: Socket
+import { NLobby } from "../types/lobby"
+import { useNavigate } from "react-router-dom"
 
 function Lobby() {
+  const navigate = useNavigate();
   const [user, setUser] = useState({id: null, nick: null, pfp: null, sessId: null, isLogin: false});
-  useEffect(() => {(async () => {
-    const result = await axios.get("/myData",  { validateStatus: (status) => {
-      console.log(status)
-      if (status !== 200) {
-        if (status === 404) Swal.fire({
-          icon: "warning",
-          title: "로그인",
-          text: "로그인을 먼저 해주세요.",
-          confirmButtonText: "확인"
-        })
-        return false
-      }
-      else return true
-    } })
-    result.data.isLogin = true
-    setUser(result.data)
+  useEffect(() => {
+    async function get() {
+      const result = await axios.get("/api/myData",  { validateStatus: (status) => {
+        if (status !== 200) {
+          if (status === 404) Swal.fire({
+            icon: "warning",
+            title: "로그인",
+            text: "로그인을 먼저 해주세요.",
+            confirmButtonText: "확인"
+          })
+          return false
+        }
+        else return true
+      } })
+      result.data.isLogin = true
+      setUser(result.data)
+    }
+    get()
     console.log(user)
-    socket = io(`/`, {query: {session: result.data.sessId}})
-    socket.emit('LBchat', {value: "안녕?"})
-    socket.on("LBchat", (data) => {
-      console.log(data)
-    })
-    socket.on("disconnect", (reason) => {
-      alert("서버와의 접속이 끊어졌습니다!")
-    })
-  })()}, [])
+  }, [])
 
+  const [crRoom, setCrRoom] = useState<NLobby.ICreateRoom>({title: `${user.nick}님의 방`})
   const pages = [
     {
       name: "방 만들기",
       icon: imgs.Plus,
-      page: <CreateRoom />,
-      onOk: () => console.log("방 만들기"),
+      page: <CreateRoom data={crRoom} onChangeData={setCrRoom} />,
+      onOk: async () => {
+        const res = await axios.post("/api/rooms/create", {
+          data: crRoom
+        },
+        {
+          validateStatus(status) {
+            if (status !== 200) {
+              Swal.fire({
+                icon: "error",
+                title: "오류!",
+                text: "방 만들기에 실패했습니다.",
+                confirmButtonText: "확인"
+              })
+              return false
+            }
+            else return true
+          }
+        })
+        navigate(res.data.redirectUrl)
+      },
       use: user.isLogin
     }
   ]

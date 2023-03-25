@@ -10,7 +10,8 @@
     "nodemon": "^2.0.20",
     "passport": "^0.6.0",
     "passport-google-oauth2": "^0.2.0",
-    "socket.io": "^4.6.1"
+    "socket.io": "^4.6.1",
+    "sweetalert2": "^11.7.3"
   },
   "name": "word_adventure",
   "version": "1.0.0",
