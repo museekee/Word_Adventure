@@ -4,6 +4,8 @@ import login from "./../images/login.svg"
 
 export default {
     bg: background,
-    Plus: plus,
-    Login: login
+    bottomBar: {
+        Plus: plus,
+        Login: login   
+    }
 }

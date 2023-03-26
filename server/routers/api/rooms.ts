@@ -34,6 +34,7 @@ router.post("/create", async (req, res) => {
 router.get("/:rid/data", async (req, res) => {
     const rid = parseInt(req.params.rid)
     if (rid >= rooms.length) return res.status(404).send({code: 404})
+    if (rooms[rid].user !== req.session.passport?.user) return res.status(403).send({code: 403})
     return res.send(rooms[rid])
 })
 

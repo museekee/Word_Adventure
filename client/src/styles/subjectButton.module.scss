@@ -1,0 +1,42 @@
+.container {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    justify-items: center;
+    gap: 10px;
+    width: 200px;
+    height: 140px;
+    cursor: pointer;
+    background: #dddddd;
+    border-radius: 10px;
+    border: 3px solid #444444;
+    padding: 5px 10px 10px 10px;
+    transition: background 250ms;
+
+    .icon {
+        width: 160px;
+        aspect-ratio: 16 / 9;
+
+        img {
+            width: 160px;
+            aspect-ratio: 16 / 9;
+            position: absolute;
+        }
+        div {
+            position: relative;
+            background: #00000088;
+            color: #ffffff;
+            top: 0;
+        }
+    }
+
+    .name {
+        color: #222222;
+        text-align: center;
+    }
+}
+.container:hover {
+    background: #ffffff;
+}
+.container:active {
+    background: #aaaaaa;
+}

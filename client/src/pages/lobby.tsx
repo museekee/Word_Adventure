@@ -30,16 +30,21 @@ function Lobby() {
       setUser(result.data)
     }
     get()
-    console.log(user)
   }, [])
 
-  const [crRoom, setCrRoom] = useState<NLobby.ICreateRoom>({title: `${user.nick}님의 방`})
+  const [crRoom, setCrRoom] = useState<NLobby.ICreateRoom>({title: "", subjects: []})
+  useEffect(() => {
+    setCrRoom(prevState => {
+      return {...prevState, title: `${user.nick}님의 방`}
+    })
+  }, [user])
   const pages = [
     {
       name: "방 만들기",
-      icon: imgs.Plus,
-      page: <CreateRoom data={crRoom} onChangeData={setCrRoom} />,
+      icon: imgs.bottomBar.Plus,
+      page: <CreateRoom onChangeData={setCrRoom} />,
       onOk: async () => {
+        console.log(crRoom)
         const res = await axios.post("/api/rooms/create", {
           data: crRoom
         },
@@ -64,19 +69,19 @@ function Lobby() {
   ]
   const bottomRights: {name: string, icon: string, page?: JSX.Element, onClick?: () => void, onOk?: () => void}[] = [
     {
-      name: user.nick == null ? "로그인" : "프로필",
-      icon: user.pfp == null ? imgs.Login : user.pfp,
-      onClick: !user.nick && (() => window.location.href = "/login/google"),
-      page: user.nick == null ? undefined : <MyData />
+      name: !user.isLogin ? "로그인" : "프로필",
+      icon: user.pfp == null ? imgs.bottomBar.Login : user.pfp,
+      onClick: !user.isLogin ? (() => window.location.href = "/login/google") : undefined,
+      page: !user.isLogin ? undefined : <MyData />
     }
   ]
   const [pg, setPg] = useState({
     type: "center",
-    idx: -1
+    idx: 0
   })
   
   return (
-    <div id={styles["stage"]} style={{backgroundImage: `url(${imgs.bg})`, backgroundSize: "cover"}}>
+    <div id={styles["stage"]} style={{backgroundImage: `linear-gradient( 109.6deg,  rgba(61,245,167,1) 11.2%, rgba(9,111,224,1) 91.1% )`, backgroundSize: "cover"}}>
       {pg.idx !== -1 ?
       <div id={styles["page"]}>
         <div className={styles["header"]}>{pg.type === "center" ? pages[pg.idx].name : bottomRights[pg.idx].name}</div>
@@ -100,13 +105,13 @@ function Lobby() {
                     idx: idx
                   })} />
                 )
+              return null
             })
           }
         </div>
         <div className={styles["right"]}>
           {
             bottomRights.map((item, idx) => {
-              console.log(idx.toString())
               return (
                 <BottomButton name={item.name} icon={item.icon} myKey={idx.toString()} onClick={!item.onClick ? () => setPg({
                   type: "right",

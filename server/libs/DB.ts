@@ -37,3 +37,17 @@ export const LoginedBySession = async (sid: string) => {
     if (data.length === 0) return false
     else return true
 }
+
+export const GetTheme = async (tid: string) => {
+    const data: DB.Theme[] = await knex
+        .select("*")
+        .where("ID", tid)
+        .from("themes")
+    return data
+}
+export const GetSubjectsList = async () => {
+    const data: DB.Subjects[] = await knex
+        .select("*")
+        .from("subjects")
+    return data
+}

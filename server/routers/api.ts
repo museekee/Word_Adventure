@@ -1,7 +1,7 @@
 import express from "express"
 import config from "./../configs/config.json"
 import session from "express-session"
-import { GetUser } from "../libs/DB"
+import { GetSubjectsList, GetTheme, GetUser } from "../libs/DB"
 const MySQLStore = require("express-mysql-session")(session)
 const sessionStore = new MySQLStore(config.DB)
 import app from "./../types/app"
@@ -36,6 +36,26 @@ router.get("/myData", async (req, res) => {
         })
     }
     return res.status(404).send({code: 404})
+})
+
+router.get("/getSubjects", async (req, res) => {
+    const result: {[x: string]: {name: string, subjects: {id: string, name: string}[]}} = {};
+    for (const item of await GetSubjectsList()) {
+        const theme = await GetTheme(item.THEME)
+        result[theme[0].ID] ??= {
+            name: theme[0].NAME,
+            subjects: []
+        }
+        result[theme[0].ID].subjects.push({
+            id: item.ID,
+            name: item.NAME
+        })
+    }
+    return res.send(result)
+})
+
+router.get("/ddd", (req, res) => {
+    res.send({id: "dd", name: "ddddd"})
 })
 
 export default router

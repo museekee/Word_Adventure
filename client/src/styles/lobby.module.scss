@@ -39,14 +39,21 @@
             border-radius: 10px;
             color: #ffffff;
             cursor: pointer;
+            transition: background 250ms;
         }
         .yes {
             width: 150px;
             background: #4d96ff;
         }
+        .yes:hover {
+            background: #42CCFF;
+        }
         .no {
             width: 100px;
             background: #ff6b6b;
+        }
+        .no:hover {
+            background: #FF342D;
         }
     }
 }
