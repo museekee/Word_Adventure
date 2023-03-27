@@ -8,6 +8,19 @@
 
     .icon {
         aspect-ratio: 1 / 1;
+        padding: 10px;
+        background: linear-gradient(0deg, #e178d0 15%, #d82abc 70%, #e178d0 100%);
+        border-radius: 20px;
+        border: 5px solid #000000;
+
+        .realIcon {
+            aspect-ratio: 1 / 1;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: contain;
+            filter: grayscale(100%);
+            border-radius: 50%;
+        }   
     }
 
     .name {

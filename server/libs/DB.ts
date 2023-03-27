@@ -51,3 +51,20 @@ export const GetSubjectsList = async () => {
         .from("subjects")
     return data
 }
+export const GetWordsBySubject = async (sid: string) => {
+    const data: DB.Word[] = await knex
+        .select("WORD")
+        .where("SUBJECT", sid)
+        .from("words")
+    return data
+}
+
+// export const TEST = async () => {
+//     for (const item of kart) {
+//         await knex("words")
+//             .insert({
+//                 WORD: item.name,
+//                 SUBJECT: "KARTBODY1"
+//             })
+//     }
+// }

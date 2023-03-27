@@ -13,19 +13,27 @@
     transition: background 250ms;
 
     .icon {
+        position: relative;
+        display: grid;
         width: 160px;
         aspect-ratio: 16 / 9;
+        align-items: center;
 
-        img {
-            width: 160px;
-            aspect-ratio: 16 / 9;
+        .icon {
             position: absolute;
+            width: 125px;
+            aspect-ratio: 16 / 9;
+            justify-self: center;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
         }
-        div {
-            position: relative;
+        .wordCount {
+            position: absolute;
             background: #00000088;
             color: #ffffff;
             top: 0;
+            width: 100%;
         }
     }
 

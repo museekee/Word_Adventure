@@ -9,7 +9,9 @@ function ThemeButton({name, icon, width, onClick}: {name: string, icon: string, 
       new Audio(audios.buttonClick).play()
       onClick()
     }} style={{width: `${width}px`}}>
-      <img className={styles["icon"]} src={icon} />
+      <div className={styles["icon"]}>
+        <div className={styles["realIcon"]} style={{backgroundImage: `url(${icon})`}} />
+      </div>
       <span className={styles["name"]}>{name}</span>
     </div>
   )

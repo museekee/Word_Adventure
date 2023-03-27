@@ -17,7 +17,10 @@ function CreateRoom({onChangeData}: {onChangeData: React.Dispatch<React.SetState
       name: string,
       subjects: {
         id: string,
-        name: string
+        name: string,
+        degree: number,
+        bgColor: string,
+        wordCount: number
       }[]
     }
   }>()
@@ -32,10 +35,11 @@ function CreateRoom({onChangeData}: {onChangeData: React.Dispatch<React.SetState
   const themeListRendering = () => {
     const result = []
     if (!subjects) return null
+    const TThemes: {[x: string]: string} = imgs.theme
     for (const [key, value] of Object.entries(subjects)) {
       result.push(
         <ThemeButton
-          icon={imgs.bottomBar.Plus} 
+          icon={TThemes[key] ?? imgs.theme.none} 
           name={value.name}
           width={120}
           onClick={() => setNowTheme(key)} />
@@ -46,12 +50,15 @@ function CreateRoom({onChangeData}: {onChangeData: React.Dispatch<React.SetState
   const subjectListRendering = () => {
     const result = []
     if (!subjects || !nowTheme) return null
+    const TSubjects: {[x: string]: string} = imgs.subject
     for (const item of subjects[nowTheme].subjects) {
       result.push(
         <SubjectButton
-          icon={imgs.bottomBar.Plus}
+          icon={TSubjects[item.id] ?? imgs.subject.none}
           name={item.name}
-          wordCount={40} />
+          wordCount={item.wordCount}
+          degree={item.degree}
+          bgColor={item.bgColor} />
       )
     }
     return result

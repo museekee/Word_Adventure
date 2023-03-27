@@ -19,6 +19,8 @@ export namespace DB {
         ID: string //? TinyText
         NAME: string //? TinyText
         THEME: string //? TinyText
+        BG_DEGREE: number //? SmaillInt
+        BG_COLORS: string //! #000000/#000000
     }
     interface Word {
         WORD: string

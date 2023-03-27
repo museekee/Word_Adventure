@@ -1,7 +1,7 @@
 import express from "express"
 import config from "./../configs/config.json"
 import session from "express-session"
-import { GetSubjectsList, GetTheme, GetUser } from "../libs/DB"
+import { GetSubjectsList, GetTheme, GetUser, GetWordsBySubject } from "../libs/DB"
 const MySQLStore = require("express-mysql-session")(session)
 const sessionStore = new MySQLStore(config.DB)
 import app from "./../types/app"
@@ -21,7 +21,7 @@ router.use(express.json())
 router.use("/rooms", roomsRouter)
 
 router.get("/myData", async (req, res) => {
-    console.log(req.session.passport?.user)
+    // console.log(req.session.passport?.user)
     if (!req.session.passport) return res.status(404).send({code: 404})
     const userId = req.session.passport.user
     if (userId) {
@@ -39,7 +39,18 @@ router.get("/myData", async (req, res) => {
 })
 
 router.get("/getSubjects", async (req, res) => {
-    const result: {[x: string]: {name: string, subjects: {id: string, name: string}[]}} = {};
+    const result: {
+        [x: string]: {
+            name: string,
+            subjects: {
+                id: string,
+                name: string,
+                degree: number,
+                bgColor: string,
+                wordCount: number
+            }[]
+        }
+    } = {};
     for (const item of await GetSubjectsList()) {
         const theme = await GetTheme(item.THEME)
         result[theme[0].ID] ??= {
@@ -48,7 +59,10 @@ router.get("/getSubjects", async (req, res) => {
         }
         result[theme[0].ID].subjects.push({
             id: item.ID,
-            name: item.NAME
+            name: item.NAME,
+            degree: item.BG_DEGREE,
+            bgColor: item.BG_COLORS,
+            wordCount: (await GetWordsBySubject(item.ID)).length
         })
     }
     return res.send(result)
