@@ -5,8 +5,11 @@ import login from "./../images/login.svg"
 //! 주제
 import SNone from "./../images/subjects/none.svg"
 import SKartBody from "./../images/subjects/kartbody.png"
+import SKartCharactor from "./../images/subjects/kartcharactor.png"
+import SKartTrack from "./../images/subjects/karttrack.png"
 
 //! 테마
+import TAll from "./../images/themes/ALL.svg"
 import TKartrider from "./../images/themes/kartrider.png"
 
 export default {
@@ -17,10 +20,13 @@ export default {
     },
     subject: {
         none: SNone,
-        KARTBODY1: SKartBody
+        KartBody: SKartBody,
+        KartCharactor: SKartCharactor,
+        KartTrack: SKartTrack
     },
     theme: {
         none: SNone,
-        KARTRIDER: TKartrider
+        All: TAll,
+        KartRider: TKartrider
     }
 }

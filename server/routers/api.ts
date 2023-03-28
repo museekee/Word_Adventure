@@ -40,30 +40,38 @@ router.get("/myData", async (req, res) => {
 
 router.get("/getSubjects", async (req, res) => {
     const result: {
-        [x: string]: {
+        id: string,
+        name: string,
+        subjects: {
+            id: string,
             name: string,
-            subjects: {
-                id: string,
-                name: string,
-                degree: number,
-                bgColor: string,
-                wordCount: number
-            }[]
-        }
-    } = {};
+            degree: number,
+            bgColor: string,
+            wordCount: number
+        }[]
+    }[] = []
     for (const item of await GetSubjectsList()) {
-        const theme = await GetTheme(item.THEME)
-        result[theme[0].ID] ??= {
-            name: theme[0].NAME,
-            subjects: []
-        }
-        result[theme[0].ID].subjects.push({
+        let pushed = false
+        const subject = {
             id: item.ID,
             name: item.NAME,
             degree: item.BG_DEGREE,
             bgColor: item.BG_COLORS,
-            wordCount: (await GetWordsBySubject(item.ID)).length
-        })
+            wordCount: (await GetWordsBySubject(item.NO)).length
+        }
+        for (const theme of result) {
+            if (item.THEME === theme.id) {
+                theme.subjects.push(subject)
+                pushed = true
+            }
+        }
+        if (!pushed) {
+            result.push({
+                id: item.THEME,
+                name: (await GetTheme(item.THEME))[0].NAME,
+                subjects: [subject]
+            })
+        }
     }
     return res.send(result)
 })

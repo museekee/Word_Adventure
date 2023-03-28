@@ -13,36 +13,57 @@ function CreateRoom({onChangeData}: {onChangeData: React.Dispatch<React.SetState
     if (e.deltaY < 0) e.currentTarget.scrollTop -= height
   }
   const [subjects, setSubjects] = useState<{
-    [x: string]: {
-      name: string,
-      subjects: {
+    id: string,
+    name: string,
+    subjects: {
         id: string,
         name: string,
         degree: number,
         bgColor: string,
         wordCount: number
-      }[]
-    }
-  }>()
+    }[]
+  }[]>([])
   const [nowTheme, setNowTheme] = useState<string>()
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([])
+  const [searchData, setSearchData] = useState<{
+    theme: {
+      id: string,
+      name: string
+    },
+    subject: {
+        id: string,
+        name: string,
+        degree: number,
+        bgColor: string,
+        wordCount: number
+    }
+  }[]>([])
   useEffect(() => {
     (async () => {
       const result = await axios.get("/api/getSubjects")
       setSubjects(result.data)
-      setNowTheme(Object.entries(result.data)[0][0])
+      setNowTheme("*")
     })()
   }, [])
   const themeListRendering = () => {
-    const result = []
+    const result = [
+      <ThemeButton
+        selected={nowTheme === "*"}
+        icon={imgs.theme.All}
+        name={"전체"}
+        width={120}
+        onClick={() => setNowTheme("*")} />
+    ]
     if (!subjects) return null
     const TThemes: {[x: string]: string} = imgs.theme
-    for (const [key, value] of Object.entries(subjects)) {
+    for (const theme of subjects) {
       result.push(
         <ThemeButton
-          icon={TThemes[key] ?? imgs.theme.none} 
-          name={value.name}
+          selected={nowTheme === theme.id}
+          icon={TThemes[theme.id] ?? imgs.theme.none} 
+          name={theme.name}
           width={120}
-          onClick={() => setNowTheme(key)} />
+          onClick={() => setNowTheme(theme.id)} />
       )
     }
     return result
@@ -51,18 +72,31 @@ function CreateRoom({onChangeData}: {onChangeData: React.Dispatch<React.SetState
     const result = []
     if (!subjects || !nowTheme) return null
     const TSubjects: {[x: string]: string} = imgs.subject
-    for (const item of subjects[nowTheme].subjects) {
-      result.push(
-        <SubjectButton
-          icon={TSubjects[item.id] ?? imgs.subject.none}
-          name={item.name}
-          wordCount={item.wordCount}
-          degree={item.degree}
-          bgColor={item.bgColor} />
-      )
+    for (const theme of subjects) {
+      if (nowTheme !== "*" && theme.id !== nowTheme) continue
+      for (const subject of theme.subjects) {
+        result.push(
+          <SubjectButton
+            icon={TSubjects[subject.id] ?? imgs.subject.none}
+            name={subject.name}
+            wordCount={subject.wordCount}
+            degree={subject.degree}
+            bgColor={subject.bgColor}
+            onClick={() => {
+              if (!selectedSubjects.includes(subject.id))
+                setSelectedSubjects((prevState) => {
+                  return [...prevState, subject.id]
+                })
+              else
+                setSelectedSubjects(selectedSubjects.filter(v => subject.id !== v))
+            }}
+            selected={selectedSubjects.includes(subject.id)} />
+        )
+      }
     }
     return result
   }
+
   return (
     <div className={styles["main"]}>
       <div className={styles["subjects"]}>
@@ -75,7 +109,17 @@ function CreateRoom({onChangeData}: {onChangeData: React.Dispatch<React.SetState
           <div className={styles["header"]}>
             <div className={styles["search"]}>
               <span>전체 주제 검색</span>
-              <input type={"text"} placeholder={"주제 이름을 입력하세요."}></input>
+              <input type={"text"} placeholder={"주제 이름을 입력하세요."} onChange={(e) => {
+                for (const theme of subjects) {
+                  for (const subject of theme.subjects) {
+                    if (subject.name.includes(e.target.value))
+                      setSearchData(prevState => [...prevState, {
+                        subject: subject,
+                        theme: theme
+                      }])
+                  }
+                }
+              }}></input>
             </div>
           </div>
           <div className={styles["list"]}>

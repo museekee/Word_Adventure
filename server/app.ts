@@ -3,7 +3,7 @@ import session from "express-session"
 import loginRouter from "./routers/login"
 import apiRouter from "./routers/api"
 import config from "./configs/config.json"
-import { GetUser, LoginedBySession, /*TEST*/ } from "./libs/DB"
+import { GetUser, LoginedBySession } from "./libs/DB"
 const MySQLStore = require("express-mysql-session")(session)
 const sessionStore = new MySQLStore(config.DB)
 const app = express()

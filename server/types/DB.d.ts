@@ -16,6 +16,7 @@ export namespace DB {
         NAME: string //? TinyText
     }
     interface Subjects {
+        NO: int //^ PRIMARY
         ID: string //? TinyText
         NAME: string //? TinyText
         THEME: string //? TinyText
@@ -24,6 +25,6 @@ export namespace DB {
     }
     interface Word {
         WORD: string
-        SUBJECT: string //? TinyText
+        SUBJECT: number //? TinyText
     }
 }

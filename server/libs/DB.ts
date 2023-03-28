@@ -1,6 +1,7 @@
 import knexModule from "knex";
 import { DB } from "../types/DB";
 import config from "./../configs/config.json"
+// import kart from "./charactor.json"
 
 const knex = knexModule({
     client: "mysql",
@@ -61,10 +62,11 @@ export const GetWordsBySubject = async (sid: string) => {
 
 // export const TEST = async () => {
 //     for (const item of kart) {
+//         if (item.id.includes("[R") || item.id.includes("[r")) continue
 //         await knex("words")
 //             .insert({
 //                 WORD: item.name,
-//                 SUBJECT: "KARTBODY1"
+//                 SUBJECT: 3
 //             })
 //     }
 // }
