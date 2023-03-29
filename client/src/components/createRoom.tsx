@@ -25,19 +25,7 @@ function CreateRoom({onChangeData}: {onChangeData: React.Dispatch<React.SetState
   }[]>([])
   const [nowTheme, setNowTheme] = useState<string>()
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([])
-  const [searchData, setSearchData] = useState<{
-    theme: {
-      id: string,
-      name: string
-    },
-    subject: {
-        id: string,
-        name: string,
-        degree: number,
-        bgColor: string,
-        wordCount: number
-    }
-  }[]>([])
+  const [searchData, setSearchData] = useState<string[]>([])
   useEffect(() => {
     (async () => {
       const result = await axios.get("/api/getSubjects")
@@ -70,15 +58,21 @@ function CreateRoom({onChangeData}: {onChangeData: React.Dispatch<React.SetState
   }
   const subjectListRendering = () => {
     const result = []
-    if (!subjects || !nowTheme) return null
+    if (!subjects || !nowTheme) return
     const TSubjects: {[x: string]: string} = imgs.subject
     for (const theme of subjects) {
-      if (nowTheme !== "*" && theme.id !== nowTheme) continue
+      if (nowTheme !== "*" && nowTheme !== "Search" && theme.id !== nowTheme) continue //! 전체 테마도 아니면서 테마아이디가 같지 않을 때
       for (const subject of theme.subjects) {
+        if (nowTheme === "Search" && !searchData.includes(subject.id)) continue
+        const data = {
+          name: ""
+        }
+        if ((nowTheme === "Search" && searchData.includes(subject.id)) || nowTheme === "*") data.name = `[${theme.name}] ${subject.name}`
+        else data.name = subject.name
         result.push(
           <SubjectButton
             icon={TSubjects[subject.id] ?? imgs.subject.none}
-            name={subject.name}
+            name={data.name}
             wordCount={subject.wordCount}
             degree={subject.degree}
             bgColor={subject.bgColor}
@@ -110,15 +104,15 @@ function CreateRoom({onChangeData}: {onChangeData: React.Dispatch<React.SetState
             <div className={styles["search"]}>
               <span>전체 주제 검색</span>
               <input type={"text"} placeholder={"주제 이름을 입력하세요."} onChange={(e) => {
+                const sbjs = []
                 for (const theme of subjects) {
                   for (const subject of theme.subjects) {
                     if (subject.name.includes(e.target.value))
-                      setSearchData(prevState => [...prevState, {
-                        subject: subject,
-                        theme: theme
-                      }])
+                      sbjs.push(subject.id)
                   }
                 }
+                setNowTheme("Search")
+                setSearchData(sbjs)
               }}></input>
             </div>
           </div>
