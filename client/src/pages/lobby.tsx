@@ -32,7 +32,7 @@ function Lobby() {
     get()
   }, [])
 
-  const [crRoom, setCrRoom] = useState<NLobby.ICreateRoom>({title: "", subjects: []})
+  const [crRoom, setCrRoom] = useState<NLobby.ICreateRoom>({title: "", subjects: [], rounds: 0})
   useEffect(() => {
     setCrRoom(prevState => {
       return {...prevState, title: `${user.nick}님의 방`}
@@ -51,7 +51,9 @@ function Lobby() {
         {
           validateStatus(status) {
             if (status !== 200) {
-              Swal.fire({
+              if (status === 403) 
+                return true
+              else Swal.fire({
                 icon: "error",
                 title: "오류!",
                 text: "방 만들기에 실패했습니다.",
@@ -62,7 +64,15 @@ function Lobby() {
             else return true
           }
         })
-        navigate(res.data.redirectUrl)
+        if (res.status === 200)
+          navigate(res.data.redirectUrl)
+        if (res.status === 403) 
+          Swal.fire({
+            icon: "error",
+            title: "오류!",
+            text: `방 만들기에 실패했습니다.\n사유 : ${res.data.reason}`,
+            confirmButtonText: "확인"
+          })
       },
       use: user.isLogin
     }

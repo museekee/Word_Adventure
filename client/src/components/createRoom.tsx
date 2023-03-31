@@ -33,6 +33,11 @@ function CreateRoom({onChangeData}: {onChangeData: React.Dispatch<React.SetState
       setNowTheme("*")
     })()
   }, [])
+  useEffect(() => {
+    onChangeData(prevState => {
+      return {...prevState, subjects: selectedSubjects}
+    })
+  }, [selectedSubjects])
   const themeListRendering = () => {
     const result = [
       <ThemeButton
@@ -61,7 +66,7 @@ function CreateRoom({onChangeData}: {onChangeData: React.Dispatch<React.SetState
     if (!subjects || !nowTheme) return
     const TSubjects: {[x: string]: string} = imgs.subject
     for (const theme of subjects) {
-      if (nowTheme !== "*" && nowTheme !== "Search" && theme.id !== nowTheme) continue //! 전체 테마도 아니면서 테마아이디가 같지 않을 때
+      if (nowTheme !== "*" && nowTheme !== "Search" && theme.id !== nowTheme) continue //! 전체 테마나 검색도 아니면서 테마아이디가 같지 않을 때
       for (const subject of theme.subjects) {
         if (nowTheme === "Search" && !searchData.includes(subject.id)) continue
         const data = {
@@ -125,6 +130,7 @@ function CreateRoom({onChangeData}: {onChangeData: React.Dispatch<React.SetState
         <h1 className={styles["title"]}>방 설정</h1>
         <div>
           <span>방 이름</span><input type="text" onChange={(e) => onChangeData(prevState => {return {...prevState, title: e.target.value}})} />
+          <span>라운드</span><input type="number" onChange={(e) => onChangeData(prevState => {return {...prevState, rounds: parseInt(e.target.value)}})} />
         </div>
       </div>
     </div>

@@ -46,18 +46,35 @@ export const GetTheme = async (tid: string) => {
         .from("themes")
     return data
 }
+
 export const GetSubjectsList = async () => {
     const data: DB.Subjects[] = await knex
         .select("*")
         .from("subjects")
     return data
 }
-export const GetWordsBySubject = async (sid: string) => {
+export const ExistSubject = async (sid: string) => {
+    const data = await GetSubject(sid)
+    if (data.length === 0) return false
+    else return true
+}
+export const GetSubject = async (sid: string) => {
+    const data: DB.Subjects[] = await knex
+        .select("*")
+        .where("ID", sid)
+        .from("subjects")
+    return data
+}
+
+export const GetWordsBySubjectNo = async (sno: string) => {
     const data: DB.Word[] = await knex
         .select("WORD")
-        .where("SUBJECT", sid)
+        .where("SUBJECT", sno)
         .from("words")
     return data
+}
+export const GetWordsBySubjectId = async (sid: string) => {
+    return await GetWordsBySubjectNo((await GetSubject(sid))[0].NO)
 }
 
 // export const TEST = async () => {

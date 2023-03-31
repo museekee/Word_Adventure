@@ -1,7 +1,7 @@
 import express from "express"
 import config from "./../configs/config.json"
 import session from "express-session"
-import { GetSubjectsList, GetTheme, GetUser, GetWordsBySubject } from "../libs/DB"
+import { GetSubjectsList, GetTheme, GetUser, GetWordsBySubjectNo } from "../libs/DB"
 const MySQLStore = require("express-mysql-session")(session)
 const sessionStore = new MySQLStore(config.DB)
 import app from "./../types/app"
@@ -57,7 +57,7 @@ router.get("/getSubjects", async (req, res) => {
             name: item.NAME,
             degree: item.BG_DEGREE,
             bgColor: item.BG_COLORS,
-            wordCount: (await GetWordsBySubject(item.NO)).length
+            wordCount: (await GetWordsBySubjectNo(item.NO)).length
         }
         for (const theme of result) {
             if (item.THEME === theme.id) {
