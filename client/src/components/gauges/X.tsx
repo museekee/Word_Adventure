@@ -1,31 +1,45 @@
 import { useEffect, useState } from "react"
 
 function GaugeX({
-  size,strokeWidth, percent
+  indiPercent, teamPercent, id
 }: {
-  size: number, strokeWidth: number, percent: number
+  indiPercent: number, teamPercent: number, id?: string
 }) {
-  const radius = (size - strokeWidth) / 2
-  const circumference = 2 * Math.PI * radius
-  const offset = circumference - (percent * 0.75 / 100) * circumference
+  const size = 100
+  const teamSize = size
+  const indiStrokeWidth = 10
+  const teamStrokeWidth = 5
+  const indiRadius = (size - indiStrokeWidth) / 2 // 개인전 반지름
+  const teamRadius = (teamSize - indiStrokeWidth - teamStrokeWidth) / 2.25 // 팀전 반지름
+  const indiCircumference = 2 * Math.PI * indiRadius // 개인전 원주
+  const teamCircumference = 2 * Math.PI * teamRadius // 팀전 원주
+  
+  const indiOffset = indiCircumference - ((indiPercent * 0.75) / 100) * indiCircumference
+  const teamOffset = teamCircumference - ((teamPercent * 0.75) / 100) * teamCircumference
 
-  const [style, setStyle] = useState({})
+  const [style, setStyle] = useState({indi: {}, team: {}})
 
   useEffect(() => {
-    const progress = {
-      stroke: "url(#gauge-gradient)",
-      strokeLinecap: 'round',
-      strokeWidth: strokeWidth,
-      strokeDasharray: circumference,
-      strokeDashoffset: offset,
-    }
-    setStyle(progress);
-  }, [setStyle, strokeWidth, circumference, offset])
+    setStyle({
+      indi: {
+        stroke: "url(#gauge-gradient)",
+        strokeWidth: indiStrokeWidth,
+        strokeDasharray: indiCircumference,
+        strokeDashoffset: indiOffset,
+      },
+      team: {
+        stroke: "#00aaff",
+        strokeWidth: teamStrokeWidth,
+        strokeDasharray: teamCircumference,
+        strokeDashoffset: teamOffset,
+      }
+    });
+  }, [setStyle, indiStrokeWidth, indiCircumference, teamCircumference, indiOffset, teamOffset, teamStrokeWidth, teamSize])
 
   return (
     <svg viewBox={`0 0 ${size} ${size}`} style={{
-      transform: `rotate(135deg)`
-    }}>
+      rotate: `135deg`
+    }} id={id}>
       <defs>
         <linearGradient id="gauge-gradient" x2="0.75" y2="1">
           <stop offset="22%" stop-color="#ff0000" />
@@ -33,20 +47,37 @@ function GaugeX({
           <stop offset="100%" stop-color="#ffffff" />
         </linearGradient>
       </defs>
+      {/* 개인전 */}
       <circle
         cx={size / 2}
         cy={size / 2}
-        r={radius}
+        r={indiRadius}
         fill="none"
-        stroke="#e9e9e9"
-        strokeWidth={strokeWidth}
+        stroke="#141414"
+        strokeWidth={indiStrokeWidth}
       />
       <circle
         cx={size / 2}
         cy={size / 2}
-        r={radius}
+        r={indiRadius}
         fill="none"
-        style={style}
+        style={style.indi}
+      />
+      {/* 팀전 */}
+      <circle
+        cx={teamSize / 2}
+        cy={teamSize / 2}
+        r={teamRadius}
+        fill="none"
+        stroke="#111111"
+        strokeWidth={teamStrokeWidth}
+      />
+      <circle
+        cx={teamSize / 2}
+        cy={teamSize / 2}
+        r={teamRadius}
+        fill="none"
+        style={style.team}
       />
     </svg>
   )
