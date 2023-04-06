@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from "react"
 
-const QuarterAngleProgressBar = ({ size, strokeWidth, percent }: {size: number, strokeWidth: number, percent: number}) => {
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (percent * 0.75 / 100) * circumference;
+function GaugeX({
+  size,strokeWidth, percent
+}: {
+  size: number, strokeWidth: number, percent: number
+}) {
+  const radius = (size - strokeWidth) / 2
+  const circumference = 2 * Math.PI * radius
+  const offset = circumference - (percent * 0.75 / 100) * circumference
 
-  const [style, setStyle] = useState({});
+  const [style, setStyle] = useState({})
 
   useEffect(() => {
     const progress = {
@@ -14,9 +18,9 @@ const QuarterAngleProgressBar = ({ size, strokeWidth, percent }: {size: number, 
       strokeWidth: strokeWidth,
       strokeDasharray: circumference,
       strokeDashoffset: offset,
-    };
+    }
     setStyle(progress);
-  }, [setStyle, strokeWidth, circumference, offset]);
+  }, [setStyle, strokeWidth, circumference, offset])
 
   return (
     <svg viewBox={`0 0 ${size} ${size}`} style={{
@@ -45,15 +49,7 @@ const QuarterAngleProgressBar = ({ size, strokeWidth, percent }: {size: number, 
         style={style}
       />
     </svg>
-  );
-};
-
-function MyComponent() {
-  return (
-    <div>
-      <QuarterAngleProgressBar size={100} strokeWidth={10} percent={100} />
-    </div>
-  );
+  )
 }
 
-export default MyComponent
+export default GaugeX
