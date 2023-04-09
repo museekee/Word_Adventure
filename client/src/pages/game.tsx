@@ -7,7 +7,7 @@ function Game() {
   return (
     <div>
       지금 방 id : {rid}
-      <GaugeX id={styles["timeGauge"]} indiPercent={20} teamPercent={75} />
+      <GaugeX id={styles["timeGauge"]} indiValue={75} indiMax={100} teamValue={32} teamMax={100} />
     </div>
   )
 }

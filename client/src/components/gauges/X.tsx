@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react"
+import imgs from "../../manager/imageManager"
 
 function GaugeX({
-  indiPercent, teamPercent, id
+  indiValue, indiMax, teamValue, teamMax, id
 }: {
-  indiPercent: number, teamPercent: number, id?: string
+  indiValue: number, indiMax: number, teamValue: number, teamMax: number, id?: string
 }) {
+  const indiPercent = (indiValue / indiMax) * 100
+  const teamPercent = (teamValue / teamMax) * 100
+  
   const size = 100
   const teamSize = size
   const indiStrokeWidth = 10
@@ -26,60 +30,56 @@ function GaugeX({
         strokeWidth: indiStrokeWidth,
         strokeDasharray: indiCircumference,
         strokeDashoffset: indiOffset,
+        transform: `rotate(135deg)`,
+        transformOrigin: "50%"
       },
       team: {
         stroke: "#00aaff",
         strokeWidth: teamStrokeWidth,
         strokeDasharray: teamCircumference,
         strokeDashoffset: teamOffset,
+        transform: `rotate(135deg)`,
+        transformOrigin: "50%"
       }
     });
   }, [setStyle, indiStrokeWidth, indiCircumference, teamCircumference, indiOffset, teamOffset, teamStrokeWidth, teamSize])
 
   return (
-    <svg viewBox={`0 0 ${size} ${size}`} style={{
-      rotate: `135deg`
+    <div style={{
+      backgroundImage: `url(${imgs.gauges.x})`,
+      backgroundRepeat: "no-repeat",
+      backgroundSize: "contain",
+      aspectRatio: "1 / 1"
     }} id={id}>
-      <defs>
-        <linearGradient id="gauge-gradient" x2="0.75" y2="1">
-          <stop offset="22%" stop-color="#ff0000" />
-          <stop offset="66%" stop-color="#ffff00" />
-          <stop offset="100%" stop-color="#ffffff" />
-        </linearGradient>
-      </defs>
-      {/* 개인전 */}
-      <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={indiRadius}
-        fill="none"
-        stroke="#141414"
-        strokeWidth={indiStrokeWidth}
-      />
-      <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={indiRadius}
-        fill="none"
-        style={style.indi}
-      />
-      {/* 팀전 */}
-      <circle
-        cx={teamSize / 2}
-        cy={teamSize / 2}
-        r={teamRadius}
-        fill="none"
-        stroke="#111111"
-        strokeWidth={teamStrokeWidth}
-      />
-      <circle
-        cx={teamSize / 2}
-        cy={teamSize / 2}
-        r={teamRadius}
-        fill="none"
-        style={style.team}
-      />
-    </svg>
+      <span style={{
+        position: "absolute", top: "47.5%", left: "50%", transform: "translate(-50%, -50%)", fontSize: "90px", color: "#ffffff"
+        }}>{indiValue}</span>
+      <svg viewBox={`0 0 ${size} ${size}`}>
+        <defs>
+          <linearGradient id="gauge-gradient" x2="0.75" y2="1">
+            <stop offset="22%" stop-color="#ff0000" />
+            <stop offset="66%" stop-color="#ffff00" />
+            <stop offset="100%" stop-color="#ffffff" />
+          </linearGradient>
+        </defs>
+        {/* 개인전 */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={indiRadius}
+          fill="none"
+          style={style.indi}
+        />
+        {/* 팀전 */}
+        <circle
+          cx={teamSize / 2}
+          cy={teamSize / 2}
+          r={teamRadius}
+          fill="none"
+          style={style.team}
+        />
+      </svg>
+    </div>
   )
 }
 

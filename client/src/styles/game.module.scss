@@ -1,9 +1,10 @@
 #timeGauge {
-    width: 300px;
+    $size: 300px;
+    width: $size;
     aspect-ratio: 1 / 1;
     position: fixed;
     margin: 0 auto;
     left: 0;
     right: 0;
-    bottom: -25px;
+    bottom: calc($size / -5);
 }

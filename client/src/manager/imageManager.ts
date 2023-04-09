@@ -12,6 +12,9 @@ import SKartTrack from "./../images/subjects/karttrack.png"
 import TAll from "./../images/themes/ALL.svg"
 import TKartrider from "./../images/themes/kartrider.png"
 
+//! 게이지
+import Gx from "./../images/gauges/X.svg"
+
 export default {
     bg: background,
     bottomBar: {
@@ -28,5 +31,8 @@ export default {
         none: SNone,
         All: TAll,
         KartRider: TKartrider
+    },
+    gauges: {
+        x: Gx
     }
 }
