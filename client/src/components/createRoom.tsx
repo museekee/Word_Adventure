@@ -130,7 +130,8 @@ function CreateRoom({onChangeData}: {onChangeData: React.Dispatch<React.SetState
         <h1 className={styles["title"]}>방 설정</h1>
         <div>
           <span>방 이름</span><input type="text" onChange={(e) => onChangeData(prevState => {return {...prevState, title: e.target.value}})} />
-          <span>라운드</span><input type="number" onChange={(e) => onChangeData(prevState => {return {...prevState, rounds: parseInt(e.target.value)}})} />
+          <span>라운드</span><input type="number" defaultValue={5} onChange={(e) => onChangeData(prevState => {return {...prevState, rounds: parseInt(e.target.value)}})} />
+          <span>시간</span><input type="number" defaultValue={150} min={10} max={200} onChange={(e) => onChangeData(prevState => {return {...prevState, time: parseInt(e.target.value)}})} />
         </div>
       </div>
     </div>

@@ -32,7 +32,7 @@ function Lobby() {
     get()
   }, [])
 
-  const [crRoom, setCrRoom] = useState<NLobby.ICreateRoom>({title: "", subjects: [], rounds: 0})
+  const [crRoom, setCrRoom] = useState<NLobby.ICreateRoom>({title: "", subjects: [], rounds: 5, time: 150})
   useEffect(() => {
     setCrRoom(prevState => {
       return {...prevState, title: `${user.nick}님의 방`}

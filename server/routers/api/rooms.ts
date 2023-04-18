@@ -20,9 +20,9 @@ router.use(express.json())
 const rooms: Choseong[] = []
 
 router.post("/create", async (req, res) => {
-    if (!req.session.passport) return res.status(403).send({code: 403})
+    if (!req.session.passport) return res.status(403).send({code: 403, reason: "로그인이 되지 않음"})
     const userId = req.session.passport.user
-    const { title, subjects, rounds }: {title: string, subjects: string[], rounds: number} = req.body.data
+    const { title, subjects, rounds, time }: {title: string, subjects: string[], rounds: number, time: number} = req.body.data
     
     
     const newSubjects = await Promise.all(subjects.map(async (v: string) => {
@@ -39,11 +39,13 @@ router.post("/create", async (req, res) => {
         title: title,
         user: userId,
         subjects: newSubjects as string[],
-        rounds: rounds
+        rounds: rounds,
+        time: time < 10 ? 10 : (time > 200 ? 200 : time) * 1000 // 10초보다 작거나 200초보다 클 때
     }
     const game = new Choseong(data)
 
     rooms.push(game)
+    game.startTimer()
 
     return res.status(200).send({
         success:true,

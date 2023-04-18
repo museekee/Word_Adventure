@@ -4,6 +4,7 @@ namespace Api {
         user: string
         subjects: string[],
         rounds: number
+        time: number
     }
 }
 

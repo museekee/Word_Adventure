@@ -3,5 +3,6 @@ export namespace NLobby {
         title: string
         subjects: string[]
         rounds: number
+        time: number
     }
 }
