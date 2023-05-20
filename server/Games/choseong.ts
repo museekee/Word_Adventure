@@ -1,4 +1,4 @@
-import Api from "../types/api";
+import Api from "../../common/types/api";
 
 export default class Choseong {
     data: Api.Rooms;

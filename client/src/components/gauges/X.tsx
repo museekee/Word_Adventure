@@ -24,6 +24,7 @@ function GaugeX({
   const [style, setStyle] = useState({indi: {}, team: {}})
 
   useEffect(() => {
+    console.log(indiOffset, teamOffset)
     setStyle({
       indi: {
         stroke: "url(#gauge-gradient)",
@@ -57,9 +58,9 @@ function GaugeX({
       <svg viewBox={`0 0 ${size} ${size}`}>
         <defs>
           <linearGradient id="gauge-gradient" x2="0.75" y2="1">
-            <stop offset="22%" stop-color="#ff0000" />
-            <stop offset="66%" stop-color="#ffff00" />
-            <stop offset="100%" stop-color="#ffffff" />
+            <stop offset="22%" stopColor="#ff0000" />
+            <stop offset="66%" stopColor="#ffff00" />
+            <stop offset="100%" stopColor="#ffffff" />
           </linearGradient>
         </defs>
         {/* 개인전 */}

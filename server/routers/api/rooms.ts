@@ -1,7 +1,7 @@
 import express from "express"
 import config from "./../../configs/config.json"
 import session from "express-session"
-import Api from "../../types/api"
+import Api from "../../../common/types/api"
 import { ExistSubject, GetWordsBySubjectId } from "../../libs/DB"
 import Choseong from "../../Games/choseong"
 const MySQLStore = require("express-mysql-session")(session)
